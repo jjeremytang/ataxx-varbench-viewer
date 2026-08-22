@@ -3,729 +3,93 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATAXX-VarBench 對局查詢</title>
+<title>ATAXX-VarBench Seed Viewer</title>
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#f8fafc}.app{max-width:1180px;margin:auto;padding:22px}h1{margin:0 0 6px;font-size:28px}.muted{color:#94a3b8}.query{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0;padding:16px;background:#1e293b;border:1px solid #334155;border-radius:14px}.field label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}input,select,button{width:100%;border:1px solid #475569;border-radius:10px;padding:11px 12px;font-size:16px;background:#0f172a;color:#fff}button{cursor:pointer;background:#2563eb;border-color:#2563eb;font-weight:600}.go{display:flex;align-items:end}.go button{height:44px}.depth-field.hidden{visibility:hidden}.hint{grid-column:1/-1;font-size:12px;color:#94a3b8}.layout{display:grid;grid-template-columns:minmax(300px,700px) minmax(270px,1fr);gap:22px;align-items:start}.board-wrap,.panel{background:#1e293b;border:1px solid #334155;border-radius:16px}.board-wrap{padding:14px}#board{display:grid;gap:3px;width:100%;aspect-ratio:1}.cell{display:grid;place-items:center;border-radius:5px;background:#cbd5e1;min-width:0;min-height:0}.cell.blocked{background:#334155}.piece{width:70%;height:70%;border-radius:50%;box-shadow:inset 0 1px 2px rgba(255,255,255,.35),0 2px 5px rgba(0,0,0,.35)}.piece.red{background:#ef4444}.piece.blue{background:#3b82f6}.panel{padding:18px}.meta{margin-bottom:14px;line-height:1.6}.matchup{font-weight:700;margin-bottom:5px}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.stat,.move-box{background:#0f172a;border-radius:10px;padding:12px}.stat span{display:block;color:#94a3b8;font-size:12px;margin-bottom:4px}.stat strong{font-size:18px}.move-box{min-height:78px;margin-bottom:16px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.controls button,.seed-nav button{background:#334155;border-color:#334155}.controls button.primary{background:#2563eb;border-color:#2563eb}.controls button:disabled{opacity:.4;cursor:default}input[type="range"]{padding:0;border:0;background:transparent}.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:#cbd5e1;font-size:13px}.dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}.dot.red{background:#ef4444}.dot.blue{background:#3b82f6}.square{width:12px;height:12px;display:inline-block;margin-right:5px;background:#334155;vertical-align:-1px}.seed-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.error{color:#fca5a5;margin:8px 0;min-height:20px}.status{color:#93c5fd;margin:8px 0;min-height:20px}@media(max-width:900px){.query{grid-template-columns:1fr 1fr}.hint{grid-column:1/-1}}@media(max-width:800px){.layout{grid-template-columns:1fr}.app{padding:14px}}@media(max-width:520px){.query{grid-template-columns:1fr}.hint{grid-column:1}.depth-field.hidden{display:none}}
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#f8fafc}.app{max-width:1180px;margin:auto;padding:22px}h1{margin:0 0 6px;font-size:28px}h2{margin:0 0 12px;font-size:20px}.muted{color:#94a3b8}.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:18px 0}.seed-row{display:grid;grid-template-columns:1fr auto;gap:10px}.finder-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.field label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}input,select,button{width:100%;border:1px solid #475569;border-radius:10px;padding:11px 12px;font-size:15px;background:#0f172a;color:#fff}button{cursor:pointer;background:#2563eb;border-color:#2563eb;font-weight:600}.secondary{background:#334155;border-color:#334155}.finder-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.seed-results{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.seed-chip{width:auto;background:#0f172a;border-color:#475569}.status{min-height:20px;margin-top:8px;color:#93c5fd}.error{min-height:20px;margin-top:4px;color:#fca5a5}.layout{display:grid;grid-template-columns:minmax(300px,700px) minmax(280px,1fr);gap:22px;align-items:start}.board-wrap,.panel{background:#1e293b;border:1px solid #334155;border-radius:16px}.board-wrap{padding:14px}#board{display:grid;gap:3px;width:100%;aspect-ratio:1}.cell{display:grid;place-items:center;border-radius:5px;background:#cbd5e1}.cell.blocked{background:#334155}.piece{width:70%;height:70%;border-radius:50%;box-shadow:inset 0 1px 2px rgba(255,255,255,.35),0 2px 5px rgba(0,0,0,.35)}.piece.red{background:#ef4444}.piece.blue{background:#3b82f6}.panel{padding:18px}.matchup{font-weight:700;font-size:18px;margin-bottom:6px}.spec{line-height:1.7;color:#cbd5e1}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.stat,.move-box{background:#0f172a;border-radius:10px;padding:12px}.stat span{display:block;color:#94a3b8;font-size:12px;margin-bottom:4px}.stat strong{font-size:18px}.move-box{min-height:78px;margin-bottom:16px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.controls button,.seed-nav button{background:#334155;border-color:#334155}.controls button.primary{background:#2563eb;border-color:#2563eb}.controls button:disabled{opacity:.4;cursor:default}input[type=range]{padding:0;border:0;background:transparent}.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:#cbd5e1;font-size:13px}.dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}.dot.red{background:#ef4444}.dot.blue{background:#3b82f6}.square{width:12px;height:12px;display:inline-block;margin-right:5px;background:#334155;vertical-align:-1px}.seed-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.note{font-size:12px;color:#94a3b8;margin-top:10px}@media(max-width:900px){.finder-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}}@media(max-width:520px){.seed-row,.finder-grid,.finder-actions{grid-template-columns:1fr}.app{padding:14px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>ATAXX-VarBench 對局查詢</h1>
-  <div class="muted">選擇紅藍雙方 AI，再用任意 seed 重建完整對局。</div>
+  <h1>ATAXX-VarBench Seed Viewer</h1>
+  <div class="muted">像 Minecraft 世界種子一樣：一個 Master Seed 直接決定棋盤與整組對戰設定。</div>
 
-  <form class="query" id="queryForm">
-    <div class="field"><label for="seedInput">Seed</label><input id="seedInput" inputmode="numeric" value="20260822"></div>
-    <div class="field"><label for="sizeInput">棋盤大小</label><input id="sizeInput" type="number" min="4" max="30" value="10"></div>
-    <div class="field"><label for="densityInput">障礙比例 %</label><input id="densityInput" type="number" min="0" max="90" step="1" value="15"></div>
-    <div class="go"><button type="submit">開始／調閱對局</button></div>
+  <section class="card">
+    <h2>輸入 Master Seed</h2>
+    <form id="seedForm" class="seed-row">
+      <input id="seedInput" inputmode="numeric" value="20260822" aria-label="Master Seed">
+      <button type="submit">載入這個 Seed</button>
+    </form>
+    <div class="note">Seed Spec v1：同一個 seed 永遠解碼成相同棋盤大小、障礙比例、紅藍 AI、AI 參數與亂數序列。</div>
+  </section>
 
-    <div class="field"><label for="redAgent">紅方 AI</label><select id="redAgent"><option value="random">Random</option><option value="greedy">Greedy</option><option value="alphabeta">Alpha-Beta</option></select></div>
-    <div class="field depth-field" id="redDepthField"><label for="redDepth">紅方 Alpha-Beta 深度</label><input id="redDepth" type="number" min="1" max="4" value="3"></div>
-    <div class="field"><label for="blueAgent">藍方 AI</label><select id="blueAgent"><option value="random">Random</option><option value="greedy" selected>Greedy</option><option value="alphabeta">Alpha-Beta</option></select></div>
-    <div class="field depth-field" id="blueDepthField"><label for="blueDepth">藍方 Alpha-Beta 深度</label><input id="blueDepth" type="number" min="1" max="4" value="3"></div>
-
-    <div class="hint">Alpha-Beta 深度越高越慢。10×10 建議先用深度 2–3；深度 4 或大棋盤可能需要較長計算時間。</div>
-  </form>
+  <section class="card">
+    <h2>Seed 產生器</h2>
+    <div class="muted" style="margin-bottom:12px">先指定你想要的條件，系統會找出符合條件的 Master Seed。</div>
+    <div class="finder-grid">
+      <div class="field"><label for="findBoard">棋盤大小</label><select id="findBoard"><option value="">不限</option></select></div>
+      <div class="field"><label for="findDensity">障礙比例</label><select id="findDensity"><option value="">不限</option></select></div>
+      <div class="field"><label for="findRed">紅方方法</label><select id="findRed"><option value="">不限</option></select></div>
+      <div class="field"><label for="findBlue">藍方方法</label><select id="findBlue"><option value="">不限</option></select></div>
+      <div class="field"><label for="findCount">要幾個 Seed</label><input id="findCount" type="number" min="1" max="20" value="5"></div>
+    </div>
+    <div class="finder-actions"><button id="findSeeds" type="button">產生符合條件的 Seed</button><button id="randomSeed" class="secondary" type="button">隨機給我一個 Seed</button></div>
+    <div class="seed-results" id="seedResults"></div>
+    <div class="note">目前 v1 Agent profiles：Random、Greedy、Alpha-Beta d=2/3/4。CNN、GNN、Self-play、PLR 等名稱已保留給未來新版規格，不會改寫 v1 舊 seed。</div>
+  </section>
 
   <div class="status" id="status"></div>
   <div class="error" id="error"></div>
 
   <div class="layout">
     <div>
-      <div class="board-wrap"><div id="board" aria-label="Ataxx 棋盤"></div></div>
-      <div class="legend"><span><i class="dot red"></i><span id="redLegend">Random / Red</span></span><span><i class="dot blue"></i><span id="blueLegend">Greedy / Blue</span></span><span><i class="square"></i>障礙</span></div>
+      <div class="board-wrap"><div id="board"></div></div>
+      <div class="legend"><span><i class="dot red"></i><span id="redLegend">Red</span></span><span><i class="dot blue"></i><span id="blueLegend">Blue</span></span><span><i class="square"></i>障礙</span></div>
     </div>
-
     <aside class="panel">
-      <div class="meta"><div class="matchup" id="matchup"></div><div id="meta"></div></div>
-      <div class="stat-grid">
-        <div class="stat"><span>回合</span><strong id="turn">0</strong></div>
-        <div class="stat"><span>進度</span><strong id="progressText">0 / 0</strong></div>
-        <div class="stat"><span>紅方棋子</span><strong id="redScore">0</strong></div>
-        <div class="stat"><span>藍方棋子</span><strong id="blueScore">0</strong></div>
-      </div>
+      <div class="matchup" id="matchup">尚未載入</div>
+      <div class="spec" id="spec"></div>
+      <div class="stat-grid"><div class="stat"><span>回合</span><strong id="turn">0</strong></div><div class="stat"><span>進度</span><strong id="progressText">0 / 0</strong></div><div class="stat"><span>紅方棋子</span><strong id="redScore">0</strong></div><div class="stat"><span>藍方棋子</span><strong id="blueScore">0</strong></div></div>
       <div class="move-box"><div class="muted" id="actor">開局</div><strong id="move">Initial position</strong></div>
       <div class="controls"><button id="prev" type="button">上一手</button><button id="play" class="primary" type="button">播放</button><button id="next" type="button">下一手</button></div>
-      <label for="timeline">對局進度</label><input id="timeline" type="range" min="0" value="0" step="1">
+      <label for="timeline">對局進度</label><input id="timeline" type="range" min="0" max="0" value="0" step="1">
       <label for="speed">播放速度：<span id="speedText">1×</span></label><input id="speed" type="range" min="0.25" max="4" value="1" step="0.25">
       <div class="muted" style="margin-top:14px" id="result"></div>
-      <div class="seed-nav"><button type="button" id="prevSeed">上一個 seed</button><button type="button" id="nextSeed">下一個 seed</button></div>
+      <div class="seed-nav"><button type="button" id="prevSeed">Seed - 1</button><button type="button" id="nextSeed">Seed + 1</button></div>
     </aside>
   </div>
 </div>
 
+<script src="seed-spec.js"></script>
 <script>
-class MT19937_64 {
-  constructor(seed) {
-    this.N = 312;
-    this.M = 156;
-    this.A = 0xB5026F5AA96619E9n;
-    this.UM = 0xFFFFFFFF80000000n;
-    this.LM = 0x7FFFFFFFn;
-    this.mt = new Array(this.N).fill(0n);
-    this.mti = this.N + 1;
-    this.seed(BigInt.asUintN(64, seed));
-  }
-
-  seed(seed) {
-    this.mt[0] = seed;
-    for (this.mti = 1; this.mti < this.N; this.mti++) {
-      const x = this.mt[this.mti - 1] ^ (this.mt[this.mti - 1] >> 62n);
-      this.mt[this.mti] = BigInt.asUintN(
-        64,
-        6364136223846793005n * x + BigInt(this.mti)
-      );
-    }
-  }
-
-  next() {
-    let x;
-    const mag = [0n, this.A];
-    if (this.mti >= this.N) {
-      let i = 0;
-      for (; i < this.N - this.M; i++) {
-        x = (this.mt[i] & this.UM) | (this.mt[i + 1] & this.LM);
-        this.mt[i] = this.mt[i + this.M] ^ (x >> 1n) ^ mag[Number(x & 1n)];
-      }
-      for (; i < this.N - 1; i++) {
-        x = (this.mt[i] & this.UM) | (this.mt[i + 1] & this.LM);
-        this.mt[i] = this.mt[i + (this.M - this.N)] ^ (x >> 1n) ^ mag[Number(x & 1n)];
-      }
-      x = (this.mt[this.N - 1] & this.UM) | (this.mt[0] & this.LM);
-      this.mt[this.N - 1] = this.mt[this.M - 1] ^ (x >> 1n) ^ mag[Number(x & 1n)];
-      this.mti = 0;
-    }
-
-    x = this.mt[this.mti++];
-    x ^= (x >> 29n) & 0x5555555555555555n;
-    x ^= (x << 17n) & 0x71D67FFFEDA60000n;
-    x ^= (x << 37n) & 0xFFF7EEE000000000n;
-    x ^= x >> 43n;
-    return BigInt.asUintN(64, x);
-  }
-}
-
-const key = (r, c) => `${r},${c}`;
-const inBounds = (r, c, n) => r >= 0 && r < n && c >= 0 && c < n;
-const starts = n => [[0, 0], [n - 1, n - 1], [0, n - 1], [n - 1, 0]];
-
-function findEscape(start, n, protectedSet) {
-  for (let d = 1; d <= 2; d++) {
-    for (let dr = -d; dr <= d; dr++) {
-      for (let dc = -d; dc <= d; dc++) {
-        if (Math.max(Math.abs(dr), Math.abs(dc)) !== d) continue;
-        const r = start[0] + dr;
-        const c = start[1] + dc;
-        if (inBounds(r, c, n) && !protectedSet.has(key(r, c))) return [r, c];
-      }
-    }
-  }
-  throw new Error('Board layout does not leave an initial legal move.');
-}
-
-function deterministicShuffle(values, rng) {
-  for (let i = values.length; i > 1; i--) {
-    const j = Number(rng.next() % BigInt(i));
-    [values[i - 1], values[j]] = [values[j], values[i - 1]];
-  }
-}
-
-function generateLevel(n, density, seed) {
-  if (n < 4) throw new Error('棋盤大小至少為 4。');
-  if (density < 0 || density > 1) throw new Error('障礙比例必須在 0% 到 100% 之間。');
-
-  const protectedSet = new Set(starts(n).map(p => key(...p)));
-  for (const start of starts(n)) {
-    const escape = findEscape(start, n, protectedSet);
-    protectedSet.add(key(...escape));
-  }
-
-  const visited = new Set();
-  const orbits = [];
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const firstKey = key(r, c);
-      if (visited.has(firstKey)) continue;
-
-      const rr = n - 1 - r;
-      const cc = n - 1 - c;
-      const secondKey = key(rr, cc);
-      visited.add(firstKey);
-      visited.add(secondKey);
-
-      if (protectedSet.has(firstKey) || protectedSet.has(secondKey)) continue;
-
-      const orbit = [[r, c]];
-      if (firstKey !== secondKey) orbit.push([rr, cc]);
-      orbits.push(orbit);
-    }
-  }
-
-  const target = Math.min(Math.round(density * n * n), n * n - protectedSet.size);
-  const rng = new MT19937_64(seed);
-  deterministicShuffle(orbits, rng);
-
-  const blocked = [];
-  for (const orbit of orbits) {
-    if (blocked.length + orbit.length <= target) blocked.push(...orbit);
-  }
-  return blocked;
-}
-
-class Game {
-  constructor(n, blocked) {
-    this.size = n;
-    this.board = Array.from({length: n}, () => Array(n).fill('.'));
-    this.player = 'R';
-    this.passes = 0;
-    this.moves = 0;
-
-    for (const [r, c] of blocked) this.board[r][c] = '#';
-    this.board[0][0] = 'R';
-    this.board[n - 1][n - 1] = 'R';
-    this.board[0][n - 1] = 'B';
-    this.board[n - 1][0] = 'B';
-  }
-
-  clone() {
-    const next = Object.create(Game.prototype);
-    next.size = this.size;
-    next.board = this.board.map(row => row.slice());
-    next.player = this.player;
-    next.passes = this.passes;
-    next.moves = this.moves;
-    return next;
-  }
-
-  count(cell) {
-    let total = 0;
-    for (const row of this.board) {
-      for (const value of row) {
-        if (value === cell) total++;
-      }
-    }
-    return total;
-  }
-
-  terminal() {
-    return this.count('R') === 0
-      || this.count('B') === 0
-      || this.count('.') === 0
-      || this.passes >= 2;
-  }
-
-  winner() {
-    if (!this.terminal()) return null;
-    const red = this.count('R');
-    const blue = this.count('B');
-    if (red === blue) return null;
-    return red > blue ? 'R' : 'B';
-  }
-
-  legal() {
-    if (this.terminal()) return [];
-    const moves = [];
-
-    for (let r = 0; r < this.size; r++) {
-      for (let c = 0; c < this.size; c++) {
-        if (this.board[r][c] !== this.player) continue;
-
-        for (let dr = -2; dr <= 2; dr++) {
-          for (let dc = -2; dc <= 2; dc++) {
-            const distance = Math.max(Math.abs(dr), Math.abs(dc));
-            if (distance === 0 || distance > 2) continue;
-
-            const nr = r + dr;
-            const nc = c + dc;
-            if (!inBounds(nr, nc, this.size) || this.board[nr][nc] !== '.') continue;
-
-            moves.push({
-              type: distance === 1 ? 'Clone' : 'Jump',
-              from: [r, c],
-              to: [nr, nc]
-            });
-          }
-        }
-      }
-    }
-    return moves;
-  }
-
-  apply(move) {
-    if (this.terminal()) return false;
-
-    if (move.type === 'Pass') {
-      if (this.legal().length !== 0) return false;
-      this.passes++;
-      this.moves++;
-      this.player = this.player === 'R' ? 'B' : 'R';
-      return true;
-    }
-
-    const [fr, fc] = move.from;
-    const [tr, tc] = move.to;
-    if (!inBounds(fr, fc, this.size) || !inBounds(tr, tc, this.size)) return false;
-    if (this.board[fr][fc] !== this.player || this.board[tr][tc] !== '.') return false;
-
-    const distance = Math.max(Math.abs(fr - tr), Math.abs(fc - tc));
-    const expected = distance === 1 ? 'Clone' : distance === 2 ? 'Jump' : 'Invalid';
-    if (expected !== move.type) return false;
-
-    if (move.type === 'Jump') this.board[fr][fc] = '.';
-    this.board[tr][tc] = this.player;
-
-    const enemy = this.player === 'R' ? 'B' : 'R';
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        const r = tr + dr;
-        const c = tc + dc;
-        if (inBounds(r, c, this.size) && this.board[r][c] === enemy) {
-          this.board[r][c] = this.player;
-        }
-      }
-    }
-
-    this.passes = 0;
-    this.moves++;
-    this.player = enemy;
-    return true;
-  }
-
-  encode() {
-    return this.board.map(row => row.join('')).join('');
-  }
-}
-
-function moveText(move) {
-  return move.type === 'Pass'
-    ? 'Pass'
-    : `${move.type} (${move.from[0]},${move.from[1]}) → (${move.to[0]},${move.to[1]})`;
-}
-
-function chooseGreedy(game) {
-  const moves = game.legal();
-  if (moves.length === 0) return {type: 'Pass'};
-
-  const own = game.player;
-  let bestMove = moves[0];
-  let bestScore = Number.NEGATIVE_INFINITY;
-
-  for (const move of moves) {
-    const next = game.clone();
-    next.apply(move);
-    const score = next.count(own);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMove = move;
-    }
-  }
-  return bestMove;
-}
-
-function evaluateAlphaBeta(game, rootPlayer) {
-  const enemy = rootPlayer === 'R' ? 'B' : 'R';
-  const pieceDiff = game.count(rootPlayer) - game.count(enemy);
-
-  if (game.terminal()) {
-    const winner = game.winner();
-    if (winner === null) return pieceDiff;
-    return winner === rootPlayer
-      ? 100000 + pieceDiff
-      : -100000 + pieceDiff;
-  }
-
-  const mobility = game.legal().length;
-  const signedMobility = game.player === rootPlayer ? mobility : -mobility;
-  return pieceDiff * 10 + signedMobility;
-}
-
-function alphaBetaSearch(game, depth, alpha, beta, rootPlayer) {
-  if (depth === 0 || game.terminal()) {
-    return evaluateAlphaBeta(game, rootPlayer);
-  }
-
-  const moves = game.legal();
-  if (moves.length === 0) {
-    const next = game.clone();
-    if (!next.apply({type: 'Pass'})) throw new Error('Alpha-Beta 無法套用必要的 Pass。');
-    return alphaBetaSearch(next, depth - 1, alpha, beta, rootPlayer);
-  }
-
-  const maximizing = game.player === rootPlayer;
-  if (maximizing) {
-    let best = Number.NEGATIVE_INFINITY;
-    for (const move of moves) {
-      const next = game.clone();
-      next.apply(move);
-      best = Math.max(best, alphaBetaSearch(next, depth - 1, alpha, beta, rootPlayer));
-      alpha = Math.max(alpha, best);
-      if (alpha >= beta) break;
-    }
-    return best;
-  }
-
-  let best = Number.POSITIVE_INFINITY;
-  for (const move of moves) {
-    const next = game.clone();
-    next.apply(move);
-    best = Math.min(best, alphaBetaSearch(next, depth - 1, alpha, beta, rootPlayer));
-    beta = Math.min(beta, best);
-    if (alpha >= beta) break;
-  }
-  return best;
-}
-
-function chooseAlphaBeta(game, depth) {
-  const moves = game.legal();
-  if (moves.length === 0) return {type: 'Pass'};
-
-  const rootPlayer = game.player;
-  let bestScore = Number.NEGATIVE_INFINITY;
-  let bestMove = moves[0];
-  let alpha = Number.NEGATIVE_INFINITY;
-  const beta = Number.POSITIVE_INFINITY;
-
-  for (const move of moves) {
-    const next = game.clone();
-    next.apply(move);
-    const score = alphaBetaSearch(next, depth - 1, alpha, beta, rootPlayer);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMove = move;
-    }
-    alpha = Math.max(alpha, bestScore);
-  }
-  return bestMove;
-}
-
-function agentLabel(config) {
-  if (config.type === 'random') return 'Random';
-  if (config.type === 'greedy') return 'Greedy';
-  return `Alpha-Beta (d=${config.depth})`;
-}
-
-function chooseAgentMove(game, config, rng) {
-  if (config.type === 'random') {
-    const moves = game.legal();
-    return moves.length
-      ? moves[Number(rng.next() % BigInt(moves.length))]
-      : {type: 'Pass'};
-  }
-  if (config.type === 'greedy') return chooseGreedy(game);
-  return chooseAlphaBeta(game, config.depth);
-}
-
-function simulate(n, density, seed, redConfig, blueConfig) {
-  const blocked = generateLevel(n, density, seed);
-  const game = new Game(n, blocked);
-
-  const redRng = new MT19937_64(BigInt.asUintN(64, seed + 1000000n));
-  const blueRng = new MT19937_64(BigInt.asUintN(64, seed + 2000000n));
-  const redName = agentLabel(redConfig);
-  const blueName = agentLabel(blueConfig);
-
-  const frames = [{
-    turn: 0,
-    player: 'Start',
-    agent: '-',
-    move: 'Initial position',
-    board: game.encode(),
-    red: 2,
-    blue: 2
-  }];
-
-  let turn = 1;
-  while (!game.terminal() && turn <= 5000) {
-    const player = game.player;
-    const config = player === 'R' ? redConfig : blueConfig;
-    const rng = player === 'R' ? redRng : blueRng;
-    const chosen = chooseAgentMove(game, config, rng);
-    const name = player === 'R' ? redName : blueName;
-
-    if (!game.apply(chosen)) throw new Error('Agent produced an illegal move.');
-
-    frames.push({
-      turn,
-      player: player === 'R' ? 'Red' : 'Blue',
-      agent: name,
-      move: moveText(chosen),
-      board: game.encode(),
-      red: game.count('R'),
-      blue: game.count('B')
-    });
-    turn++;
-  }
-
-  if (!game.terminal()) throw new Error('Match exceeded 5000 turns.');
-
-  const red = game.count('R');
-  const blue = game.count('B');
-  return {
-    frames,
-    winner: red === blue ? 'Draw' : red > blue ? 'Red' : 'Blue',
-    blocked: blocked.length,
-    redName,
-    blueName
-  };
-}
-
-const $ = id => document.getElementById(id);
-const board = $('board');
-const seedInput = $('seedInput');
-const sizeInput = $('sizeInput');
-const densityInput = $('densityInput');
-const redAgent = $('redAgent');
-const blueAgent = $('blueAgent');
-const redDepth = $('redDepth');
-const blueDepth = $('blueDepth');
-const redDepthField = $('redDepthField');
-const blueDepthField = $('blueDepthField');
-const queryForm = $('queryForm');
-const statusEl = $('status');
-const errorEl = $('error');
-const matchup = $('matchup');
-const meta = $('meta');
-const turnEl = $('turn');
-const progressText = $('progressText');
-const redScore = $('redScore');
-const blueScore = $('blueScore');
-const actor = $('actor');
-const moveEl = $('move');
-const prev = $('prev');
-const play = $('play');
-const next = $('next');
-const timeline = $('timeline');
-const speed = $('speed');
-const speedText = $('speedText');
-const result = $('result');
-const prevSeed = $('prevSeed');
-const nextSeed = $('nextSeed');
-const redLegend = $('redLegend');
-const blueLegend = $('blueLegend');
-
-let data = null;
-let index = 0;
-let timer = null;
-let currentSeed = 0n;
-
-function stop() {
-  if (timer !== null) {
-    clearInterval(timer);
-    timer = null;
-  }
-  play.textContent = '播放';
-}
-
-function updateDepthVisibility() {
-  redDepthField.classList.toggle('hidden', redAgent.value !== 'alphabeta');
-  blueDepthField.classList.toggle('hidden', blueAgent.value !== 'alphabeta');
-}
-
-function renderBoard(text, n) {
-  board.replaceChildren();
-  board.style.gridTemplateColumns = `repeat(${n},1fr)`;
-
-  for (const value of text) {
-    const cell = document.createElement('div');
-    cell.className = value === '#' ? 'cell blocked' : 'cell';
-    if (value === 'R' || value === 'B') {
-      const piece = document.createElement('div');
-      piece.className = `piece ${value === 'R' ? 'red' : 'blue'}`;
-      cell.appendChild(piece);
-    }
-    board.appendChild(cell);
-  }
-}
-
-function render() {
-  if (!data) return;
-  const frame = data.frames[index];
-  renderBoard(frame.board, data.size);
-  turnEl.textContent = frame.turn;
-  progressText.textContent = `${index} / ${data.frames.length - 1}`;
-  redScore.textContent = frame.red;
-  blueScore.textContent = frame.blue;
-  actor.textContent = frame.turn === 0 ? '開局' : `${frame.player} · ${frame.agent}`;
-  moveEl.textContent = frame.move;
-  timeline.value = index;
-  prev.disabled = index === 0;
-  next.disabled = index === data.frames.length - 1;
-}
-
-function start() {
-  if (!data) return;
-  if (index >= data.frames.length - 1) {
-    index = 0;
-    render();
-  }
-
-  stop();
-  const delay = Math.max(120, Math.round(900 / Number(speed.value)));
-  timer = setInterval(() => {
-    if (index >= data.frames.length - 1) {
-      stop();
-      return;
-    }
-    index++;
-    render();
-  }, delay);
-  play.textContent = '暫停';
-}
-
-function readAgentConfig(type, depthValue) {
-  if (!['random', 'greedy', 'alphabeta'].includes(type)) {
-    throw new Error('未知的 AI 類型。');
-  }
-  const depth = Number(depthValue);
-  if (type === 'alphabeta' && (!Number.isInteger(depth) || depth < 1 || depth > 4)) {
-    throw new Error('Alpha-Beta 深度請輸入 1 到 4 的整數。');
-  }
-  return {type, depth};
-}
-
-function load(seedText, sizeText, densityText, redType, redDepthValue, blueType, blueDepthValue, pushUrl = true) {
-  stop();
-  errorEl.textContent = '';
-  statusEl.textContent = '計算對局中…';
-
-  setTimeout(() => {
-    try {
-      const seed = BigInt(seedText);
-      if (seed < 0n || seed > 18446744073709551615n) {
-        throw new Error('Seed 必須是 0 到 18446744073709551615 的整數。');
-      }
-
-      const size = Number(sizeText);
-      const densityPercent = Number(densityText);
-      if (!Number.isInteger(size) || size < 4 || size > 30) {
-        throw new Error('棋盤大小請輸入 4 到 30 的整數。');
-      }
-      if (!Number.isFinite(densityPercent) || densityPercent < 0 || densityPercent > 90) {
-        throw new Error('障礙比例請輸入 0 到 90。');
-      }
-
-      const redConfig = readAgentConfig(redType, redDepthValue);
-      const blueConfig = readAgentConfig(blueType, blueDepthValue);
-      currentSeed = seed;
-
-      const density = densityPercent / 100;
-      const sim = simulate(size, density, seed, redConfig, blueConfig);
-      data = {
-        ...sim,
-        size,
-        density,
-        seed,
-        redConfig,
-        blueConfig
-      };
-
-      index = 0;
-      timeline.max = data.frames.length - 1;
-      matchup.textContent = `${sim.redName}（紅） vs ${sim.blueName}（藍）`;
-      meta.textContent = `${size}×${size} · 障礙 ${densityPercent}% (${sim.blocked} 格) · seed ${seed}`;
-      redLegend.textContent = `${sim.redName} / Red`;
-      blueLegend.textContent = `${sim.blueName} / Blue`;
-      result.textContent = `結果：${sim.winner === 'Draw' ? '平手' : sim.winner + ' 獲勝'} · 共 ${data.frames.length - 1} 回合`;
-      statusEl.textContent = '對局已完成。';
-      render();
-
-      if (pushUrl) {
-        const params = new URLSearchParams({
-          seed: String(seed),
-          size: String(size),
-          density: String(densityPercent),
-          red: redConfig.type,
-          blue: blueConfig.type,
-          redDepth: String(redConfig.depth),
-          blueDepth: String(blueConfig.depth)
-        });
-        history.replaceState(null, '', `?${params}`);
-      }
-    } catch (error) {
-      statusEl.textContent = '';
-      errorEl.textContent = error.message;
-    }
-  }, 20);
-}
-
-queryForm.addEventListener('submit', event => {
-  event.preventDefault();
-  load(
-    seedInput.value,
-    sizeInput.value,
-    densityInput.value,
-    redAgent.value,
-    redDepth.value,
-    blueAgent.value,
-    blueDepth.value
-  );
-});
-
-redAgent.addEventListener('change', updateDepthVisibility);
-blueAgent.addEventListener('change', updateDepthVisibility);
-
-prev.addEventListener('click', () => {
-  stop();
-  if (index > 0) index--;
-  render();
-});
-
-next.addEventListener('click', () => {
-  stop();
-  if (data && index < data.frames.length - 1) index++;
-  render();
-});
-
-play.addEventListener('click', () => {
-  if (timer === null) start();
-  else stop();
-});
-
-timeline.addEventListener('input', () => {
-  stop();
-  index = Number(timeline.value);
-  render();
-});
-
-speed.addEventListener('input', () => {
-  speedText.textContent = `${Number(speed.value).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}×`;
-  if (timer !== null) start();
-});
-
-prevSeed.addEventListener('click', () => {
-  if (currentSeed > 0n) {
-    seedInput.value = String(currentSeed - 1n);
-    queryForm.requestSubmit();
-  }
-});
-
-nextSeed.addEventListener('click', () => {
-  if (currentSeed < 18446744073709551615n) {
-    seedInput.value = String(currentSeed + 1n);
-    queryForm.requestSubmit();
-  }
-});
-
-const params = new URLSearchParams(location.search);
-if (params.has('seed')) seedInput.value = params.get('seed');
-if (params.has('size')) sizeInput.value = params.get('size');
-if (params.has('density')) densityInput.value = params.get('density');
-if (params.has('red')) redAgent.value = params.get('red');
-if (params.has('blue')) blueAgent.value = params.get('blue');
-if (params.has('redDepth')) redDepth.value = params.get('redDepth');
-if (params.has('blueDepth')) blueDepth.value = params.get('blueDepth');
-
-updateDepthVisibility();
-load(
-  seedInput.value,
-  sizeInput.value,
-  densityInput.value,
-  redAgent.value,
-  redDepth.value,
-  blueAgent.value,
-  blueDepth.value,
-  false
-);
+const $=id=>document.getElementById(id);
+const seedInput=$('seedInput'),seedForm=$('seedForm'),statusEl=$('status'),errorEl=$('error'),board=$('board'),matchup=$('matchup'),specEl=$('spec'),redLegend=$('redLegend'),blueLegend=$('blueLegend'),turnEl=$('turn'),progressText=$('progressText'),redScore=$('redScore'),blueScore=$('blueScore'),actor=$('actor'),moveEl=$('move'),prev=$('prev'),play=$('play'),next=$('next'),timeline=$('timeline'),speed=$('speed'),speedText=$('speedText'),result=$('result'),prevSeed=$('prevSeed'),nextSeed=$('nextSeed');
+const findBoard=$('findBoard'),findDensity=$('findDensity'),findRed=$('findRed'),findBlue=$('findBlue'),findCount=$('findCount'),findSeeds=$('findSeeds'),randomSeed=$('randomSeed'),seedResults=$('seedResults');
+let data=null,index=0,timer=null,currentSeed=0n,worker=null;
+
+function addOption(select,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;select.appendChild(o);}
+for(const n of AtaxxSeedSpec.BOARD_SIZES_V1)addOption(findBoard,String(n),`${n}×${n}`);
+for(const d of AtaxxSeedSpec.DENSITIES_V1)addOption(findDensity,String(d),`${d}%`);
+for(const a of AtaxxSeedSpec.AGENT_PROFILES_V1){addOption(findRed,a.id,a.label);addOption(findBlue,a.id,a.label);}
+
+function parseSeed(text){if(!/^\d+$/.test(String(text).trim()))throw new Error('Master Seed 必須是 0 到 18446744073709551615 的整數。');const x=BigInt(text);if(x<0n||x>18446744073709551615n)throw new Error('Master Seed 超出 uint64 範圍。');return x;}
+function stop(){if(timer!==null){clearInterval(timer);timer=null;}play.textContent='播放';}
+function renderBoard(text,n){board.replaceChildren();board.style.gridTemplateColumns=`repeat(${n},1fr)`;for(const v of text){const c=document.createElement('div');c.className=v==='#'?'cell blocked':'cell';if(v==='R'||v==='B'){const p=document.createElement('div');p.className=`piece ${v==='R'?'red':'blue'}`;c.appendChild(p);}board.appendChild(c);}}
+function render(){if(!data)return;const f=data.frames[index];renderBoard(f.board,data.spec.boardSize);turnEl.textContent=f.turn;progressText.textContent=`${index} / ${data.frames.length-1}`;redScore.textContent=f.red;blueScore.textContent=f.blue;actor.textContent=f.turn===0?'開局':`${f.player} · ${f.agent}`;moveEl.textContent=f.move;timeline.value=index;prev.disabled=index===0;next.disabled=index===data.frames.length-1;}
+function startPlayback(){if(!data)return;if(index>=data.frames.length-1){index=0;render();}stop();const delay=Math.max(120,Math.round(900/Number(speed.value)));timer=setInterval(()=>{if(index>=data.frames.length-1){stop();return;}index++;render();},delay);play.textContent='暫停';}
+
+function showDecoded(decoded){matchup.textContent=`${decoded.redAgent.label}（紅） vs ${decoded.blueAgent.label}（藍）`;specEl.innerHTML=`Master Seed：<b>${decoded.masterSeed}</b><br>Seed Spec：v${decoded.version}<br>棋盤：${decoded.boardSize}×${decoded.boardSize}<br>障礙比例：${decoded.densityPercent}%<br>Matchup ID：${decoded.matchupId}`;redLegend.textContent=`${decoded.redAgent.label} / Red`;blueLegend.textContent=`${decoded.blueAgent.label} / Blue`;}
+
+function loadSeed(seedText,pushUrl=true){stop();errorEl.textContent='';try{currentSeed=parseSeed(seedText);seedInput.value=String(currentSeed);const decoded=AtaxxSeedSpec.decode(currentSeed);showDecoded(decoded);statusEl.textContent='正在計算完整對局…';result.textContent='';if(worker)worker.terminate();worker=new Worker('worker.js');worker.onmessage=e=>{const msg=e.data;if(msg.type==='progress'){statusEl.textContent=`正在計算完整對局… 已完成 ${msg.turn} 手`;return;}if(msg.type==='error'){statusEl.textContent='';errorEl.textContent=msg.message;return;}if(msg.type==='done'){data=msg.result;index=0;timeline.max=data.frames.length-1;statusEl.textContent='對局計算完成。';result.textContent=`結果：${data.winner==='Draw'?'平手':data.winner+' 獲勝'} · ${data.frames.length-1} 回合 · ${data.blocked} 個障礙`;render();}};worker.onerror=()=>{statusEl.textContent='';errorEl.textContent='對局計算器發生錯誤，請重新整理頁面。';};worker.postMessage({masterSeed:String(currentSeed)});if(pushUrl)history.replaceState(null,'',`?seed=${currentSeed}`);}catch(err){statusEl.textContent='';errorEl.textContent=err.message;}}
+
+function randomUint64(){const a=new Uint32Array(2);crypto.getRandomValues(a);return(BigInt(a[0])<<32n)|BigInt(a[1]);}
+function generateSeeds(){seedResults.replaceChildren();errorEl.textContent='';const count=Math.max(1,Math.min(20,Number(findCount.value)||1));const filters={boardSize:findBoard.value,densityPercent:findDensity.value,redAgent:findRed.value,blueAgent:findBlue.value};let candidate=randomUint64(),checked=0,found=0;const limit=1000000;while(checked<limit&&found<count){const d=AtaxxSeedSpec.decode(candidate);if(AtaxxSeedSpec.matches(d,filters)){const b=document.createElement('button');b.type='button';b.className='seed-chip';b.textContent=String(candidate);b.title=`${d.boardSize}×${d.boardSize}, ${d.densityPercent}%, ${d.redAgent.label} vs ${d.blueAgent.label}`;b.addEventListener('click',()=>loadSeed(String(candidate)));seedResults.appendChild(b);found++;}candidate=BigInt.asUintN(64,candidate+1n);checked++;}statusEl.textContent=found?`找到 ${found} 個符合條件的 Seed（檢查 ${checked} 個候選）。`:`找不到符合條件的 Seed。`;}
+
+seedForm.addEventListener('submit',e=>{e.preventDefault();loadSeed(seedInput.value);});
+findSeeds.addEventListener('click',generateSeeds);
+randomSeed.addEventListener('click',()=>loadSeed(String(randomUint64())));
+prev.addEventListener('click',()=>{stop();if(index>0)index--;render();});next.addEventListener('click',()=>{stop();if(data&&index<data.frames.length-1)index++;render();});play.addEventListener('click',()=>timer===null?startPlayback():stop());timeline.addEventListener('input',()=>{stop();index=Number(timeline.value);render();});speed.addEventListener('input',()=>{speedText.textContent=`${Number(speed.value).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')}×`;if(timer!==null)startPlayback();});prevSeed.addEventListener('click',()=>{if(currentSeed>0n)loadSeed(String(currentSeed-1n));});nextSeed.addEventListener('click',()=>{if(currentSeed<18446744073709551615n)loadSeed(String(currentSeed+1n));});
+
+const params=new URLSearchParams(location.search);if(params.has('seed'))seedInput.value=params.get('seed');loadSeed(seedInput.value,false);
 </script>
 </body>
 </html>
