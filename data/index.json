@@ -1,6 +1,6 @@
 {
   "spec_version": 2,
-  "count": 2,
+  "count": 10,
   "runs": [
     {
       "seed": "1096",
@@ -21,6 +21,86 @@
       "blue_agent": "ab4",
       "winner": "Blue",
       "turns": 136
+    },
+    {
+      "seed": "5192",
+      "case_id": "2",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 136
+    },
+    {
+      "seed": "7240",
+      "case_id": "3",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "9288",
+      "case_id": "4",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 102
+    },
+    {
+      "seed": "11336",
+      "case_id": "5",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 131
+    },
+    {
+      "seed": "13384",
+      "case_id": "6",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 118
+    },
+    {
+      "seed": "15432",
+      "case_id": "7",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 128
+    },
+    {
+      "seed": "17480",
+      "case_id": "8",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 132
+    },
+    {
+      "seed": "19528",
+      "case_id": "9",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 110
     }
   ]
 }

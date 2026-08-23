@@ -10,6 +10,7 @@
   "red_rng_seed": "9967632283011684758",
   "blue_rng_seed": "13649564112068692699",
   "blocked": 20,
+  "termination_reason": "natural",
   "winner": "Blue",
   "turns": 136,
   "total_search_nodes": 1119643,
