@@ -11,7 +11,7 @@
 <body>
 <div class="app">
   <h1>ATAXX-VarBench Seed Viewer</h1>
-  <div class="muted">Seed Spec v2：seed 用公式直接編碼實驗條件；Viewer 只讀已由正式 C++ engine 跑完並發布的資料。</div>
+  <div class="muted">Seed Spec v3：同一 case + board + density 共用同一 world；Viewer 仍可回放既有 v2 pilot 資料。</div>
 
   <section class="card">
     <h2>輸入 Master Seed</h2>
@@ -19,7 +19,7 @@
       <input id="seedInput" inputmode="numeric" value="0" aria-label="Master Seed">
       <button type="submit">載入已發布結果</button>
     </form>
-    <div class="note">若該 seed 尚未由 ataxx_seed_runner 正式執行並上傳，Viewer 會顯示「尚未發布」，不會在瀏覽器臨時重算。</div>
+    <div class="note">若 seed 尚未由正式 C++ engine 執行並發布，Viewer 不會在瀏覽器臨時重算。</div>
   </section>
 
   <section class="card">
@@ -32,11 +32,11 @@
       <div class="field"><label>Case ID</label><input id="caseInput" type="number" min="0" value="0"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-      <button id="generateBtn" type="button">公式產生 Seed</button>
+      <button id="generateBtn" type="button">公式產生 v3 Seed</button>
       <button id="loadGeneratedBtn" class="secondary" type="button">產生並載入已發布結果</button>
     </div>
     <div class="seed-results" id="seedResults"></div>
-    <div class="note">這裡沒有搜尋 candidate seed。相同條件 + case_id 永遠得到相同 Master Seed。</div>
+    <div class="note">v3 中 agent 組合只影響 Master Seed，不影響同 case 的 world layout。</div>
   </section>
 
   <div id="status" class="status"></div>
@@ -70,12 +70,12 @@ AtaxxSeedSpec.BOARD_SIZES.forEach(x=>opt(boardSelect,x,`${x}×${x}`));
 AtaxxSeedSpec.DENSITIES.forEach(x=>opt(densitySelect,x,`${x}%`));
 AtaxxSeedSpec.AGENTS.forEach(x=>{opt(redSelect,x.id,x.label);opt(blueSelect,x.id,x.label)});
 function generatedSeed(){return AtaxxSeedSpec.encode({boardSize:Number(boardSelect.value),densityPercent:Number(densitySelect.value),redAgent:redSelect.value,blueAgent:blueSelect.value,caseId:BigInt(caseInput.value||0)})}
-function showGenerated(seed){const d=AtaxxSeedSpec.decode(seed);$('seedResults').innerHTML='';const b=document.createElement('button');b.className='seed-chip';b.textContent=String(seed);b.onclick=()=>loadSeed(seed);$('seedResults').appendChild(b);$('status').textContent=`Seed ${seed} = ${d.boardSize}×${d.boardSize}, ${d.densityPercent}%, ${d.redAgent.label} vs ${d.blueAgent.label}, case ${d.caseId}`;return seed}
+function showGenerated(seed){const d=AtaxxSeedSpec.decode(seed);$('seedResults').innerHTML='';const b=document.createElement('button');b.className='seed-chip';b.textContent=String(seed);b.onclick=()=>loadSeed(seed);$('seedResults').appendChild(b);$('status').textContent=`Seed ${seed} = v${d.version}, ${d.boardSize}×${d.boardSize}, ${d.densityPercent}%, ${d.redAgent.label} vs ${d.blueAgent.label}, case ${d.caseId}`;return seed}
 function renderBoard(text,n){const el=$('board');el.replaceChildren();el.style.gridTemplateColumns=`repeat(${n},1fr)`;for(const v of text){const c=document.createElement('div');c.className=v==='#'?'cell blocked':'cell';if(v==='R'||v==='B'){const p=document.createElement('div');p.className=`piece ${v==='R'?'red':'blue'}`;c.appendChild(p)}el.appendChild(c)}}
 function render(){if(!data)return;const f=data.frames[index];renderBoard(f.board,data.board_size);$('turn').textContent=f.turn;$('progress').textContent=`${index} / ${data.frames.length-1}`;$('redScore').textContent=f.red;$('blueScore').textContent=f.blue;$('actor').textContent=f.player==='Start'?'開局':`${f.player} · ${f.agent}`;$('move').textContent=f.move;$('timeline').value=index;$('prev').disabled=index===0;$('next').disabled=index===data.frames.length-1}
 function stop(){if(timer!==null){clearInterval(timer);timer=null}$('play').textContent='播放'}
 function start(){if(!data)return;if(index>=data.frames.length-1)index=0;stop();timer=setInterval(()=>{if(index>=data.frames.length-1){stop();return}index++;render()},700);$('play').textContent='暫停'}
-async function loadSeed(seedValue){stop();$('error').textContent='';const seed=BigInt(seedValue);seedInput.value=String(seed);const decoded=AtaxxSeedSpec.decode(seed);$('status').textContent='正在讀取已發布資料…';try{const r=await fetch(`data/runs/${seed}.json`,{cache:'no-store'});if(!r.ok)throw new Error('NOT_PUBLISHED');const x=await r.json();if(String(x.seed)!==String(seed)||x.spec_version!==2)throw new Error('INVALID_DATA');data=x;index=0;$('timeline').max=x.frames.length-1;$('matchup').textContent=`${x.red_agent.label}（紅） vs ${x.blue_agent.label}（藍）`;$('spec').innerHTML=`Master Seed：<b>${x.seed}</b><br>Case ID：${x.case_id}<br>棋盤：${x.board_size}×${x.board_size}<br>障礙比例：${x.density_percent}%<br>Seed Spec：v${x.spec_version}`;$('result').textContent=`結果：${x.winner} · ${x.turns} 回合 · ${x.blocked} 個障礙 · ${x.total_search_nodes} search nodes`;$('status').textContent='已載入正式保存的模擬資料。';render();history.replaceState(null,'',`?seed=${seed}`)}catch(e){data=null;$('status').textContent='';$('error').textContent=e.message==='NOT_PUBLISHED'?`Seed ${seed} 尚未發布正式模擬資料。請先用 ataxx_seed_runner 執行並將 JSON 上傳 Viewer。`:'資料格式錯誤或載入失敗。';$('matchup').textContent=`${decoded.redAgent.label} vs ${decoded.blueAgent.label}`;$('spec').textContent=`Seed ${seed} · case ${decoded.caseId}`}}
+async function loadSeed(seedValue){stop();$('error').textContent='';const seed=BigInt(seedValue);seedInput.value=String(seed);let decoded;try{decoded=AtaxxSeedSpec.decode(seed)}catch(e){$('error').textContent=e.message;return}$('status').textContent='正在讀取已發布資料…';try{const r=await fetch(`data/runs/${seed}.json`,{cache:'no-store'});if(!r.ok)throw new Error('NOT_PUBLISHED');const x=await r.json();if(String(x.seed)!==String(seed)||![2,3].includes(x.spec_version))throw new Error('INVALID_DATA');data=x;index=0;$('timeline').max=x.frames.length-1;$('matchup').textContent=`${x.red_agent.label}（紅） vs ${x.blue_agent.label}（藍）`;let spec=`Master Seed：<b>${x.seed}</b><br>Case ID：${x.case_id}<br>棋盤：${x.board_size}×${x.board_size}<br>障礙比例：${x.density_percent}%<br>Seed Spec：v${x.spec_version}`;if(x.world_key!==undefined)spec+=`<br>World Key：${x.world_key}`;$('spec').innerHTML=spec;$('result').textContent=`結果：${x.winner} · ${x.turns} 回合 · ${x.blocked} 個障礙 · ${x.total_search_nodes} search nodes · ${x.termination_reason||'natural'}`;$('status').textContent='已載入正式保存的模擬資料。';render();history.replaceState(null,'',`?seed=${seed}`)}catch(e){data=null;$('status').textContent='';$('error').textContent=e.message==='NOT_PUBLISHED'?`Seed ${seed} 尚未發布正式模擬資料。`:'資料格式錯誤或載入失敗。';$('matchup').textContent=`${decoded.redAgent.label} vs ${decoded.blueAgent.label}`;$('spec').textContent=`Seed ${seed} · v${decoded.version} · case ${decoded.caseId}`}}
 $('generateBtn').onclick=()=>showGenerated(generatedSeed());
 $('loadGeneratedBtn').onclick=()=>loadSeed(showGenerated(generatedSeed()));
 $('seedForm').onsubmit=e=>{e.preventDefault();if(/^\d+$/.test(seedInput.value.trim()))loadSeed(BigInt(seedInput.value.trim()));else $('error').textContent='Master Seed 必須是非負整數。'};
