@@ -5,91 +5,82 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ATAXX-VarBench Seed Viewer</title>
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#f8fafc}.app{max-width:1180px;margin:auto;padding:22px}h1{margin:0 0 6px;font-size:28px}h2{margin:0 0 12px;font-size:20px}.muted{color:#94a3b8}.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:18px 0}.seed-row{display:grid;grid-template-columns:1fr auto;gap:10px}.finder-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.field label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}input,select,button{width:100%;border:1px solid #475569;border-radius:10px;padding:11px 12px;font-size:15px;background:#0f172a;color:#fff}button{cursor:pointer;background:#2563eb;border-color:#2563eb;font-weight:600}.secondary{background:#334155;border-color:#334155}.finder-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.seed-results{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.seed-chip{width:auto;background:#0f172a;border-color:#475569}.status{min-height:20px;margin-top:8px;color:#93c5fd}.error{min-height:20px;margin-top:4px;color:#fca5a5}.layout{display:grid;grid-template-columns:minmax(300px,700px) minmax(280px,1fr);gap:22px;align-items:start}.board-wrap,.panel{background:#1e293b;border:1px solid #334155;border-radius:16px}.board-wrap{padding:14px}#board{display:grid;gap:3px;width:100%;aspect-ratio:1}.cell{display:grid;place-items:center;border-radius:5px;background:#cbd5e1}.cell.blocked{background:#334155}.piece{width:70%;height:70%;border-radius:50%;box-shadow:inset 0 1px 2px rgba(255,255,255,.35),0 2px 5px rgba(0,0,0,.35)}.piece.red{background:#ef4444}.piece.blue{background:#3b82f6}.panel{padding:18px}.matchup{font-weight:700;font-size:18px;margin-bottom:6px}.spec{line-height:1.7;color:#cbd5e1}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.stat,.move-box{background:#0f172a;border-radius:10px;padding:12px}.stat span{display:block;color:#94a3b8;font-size:12px;margin-bottom:4px}.stat strong{font-size:18px}.move-box{min-height:78px;margin-bottom:16px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.controls button,.seed-nav button{background:#334155;border-color:#334155}.controls button.primary{background:#2563eb;border-color:#2563eb}.controls button:disabled{opacity:.4;cursor:default}input[type=range]{padding:0;border:0;background:transparent}.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:#cbd5e1;font-size:13px}.dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}.dot.red{background:#ef4444}.dot.blue{background:#3b82f6}.square{width:12px;height:12px;display:inline-block;margin-right:5px;background:#334155;vertical-align:-1px}.seed-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.note{font-size:12px;color:#94a3b8;margin-top:10px}@media(max-width:900px){.finder-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}}@media(max-width:520px){.seed-row,.finder-grid,.finder-actions{grid-template-columns:1fr}.app{padding:14px}}
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#f8fafc}.app{max-width:1180px;margin:auto;padding:22px}h1{margin:0 0 6px;font-size:28px}h2{margin:0 0 12px;font-size:20px}.muted{color:#94a3b8}.card,.board-wrap,.panel{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:18px 0}.seed-row{display:grid;grid-template-columns:1fr auto;gap:10px}.generator{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.field label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}input,select,button{width:100%;border:1px solid #475569;border-radius:10px;padding:11px 12px;font-size:15px;background:#0f172a;color:#fff}button{cursor:pointer;background:#2563eb;border-color:#2563eb;font-weight:600}.secondary{background:#334155;border-color:#334155}.seed-results{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.seed-chip{width:auto;background:#0f172a}.status{min-height:22px;color:#93c5fd;margin:10px 0}.error{min-height:22px;color:#fca5a5}.layout{display:grid;grid-template-columns:minmax(320px,700px) minmax(280px,1fr);gap:22px;align-items:start}.board-wrap{margin:0}.panel{margin:0}#board{display:grid;gap:3px;width:100%;aspect-ratio:1}.cell{display:grid;place-items:center;border-radius:5px;background:#cbd5e1}.cell.blocked{background:#334155}.piece{width:70%;height:70%;border-radius:50%}.piece.red{background:#ef4444}.piece.blue{background:#3b82f6}.matchup{font-weight:700;font-size:18px}.spec{line-height:1.7;color:#cbd5e1;margin-top:6px}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.stat,.move-box{background:#0f172a;border-radius:10px;padding:12px}.stat span{display:block;color:#94a3b8;font-size:12px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.controls button{background:#334155}.controls .primary{background:#2563eb}.note{font-size:12px;color:#94a3b8;margin-top:10px}@media(max-width:900px){.generator{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}}@media(max-width:520px){.seed-row,.generator{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
   <h1>ATAXX-VarBench Seed Viewer</h1>
-  <div class="muted">像 Minecraft 世界種子一樣：一個 Master Seed 直接決定棋盤與整組對戰設定。</div>
+  <div class="muted">Seed Spec v2：seed 用公式直接編碼實驗條件；Viewer 只讀已由正式 C++ engine 跑完並發布的資料。</div>
 
   <section class="card">
     <h2>輸入 Master Seed</h2>
     <form id="seedForm" class="seed-row">
-      <input id="seedInput" inputmode="numeric" value="20260822" aria-label="Master Seed">
-      <button type="submit">載入這個 Seed</button>
+      <input id="seedInput" inputmode="numeric" value="0" aria-label="Master Seed">
+      <button type="submit">載入已發布結果</button>
     </form>
-    <div class="note">Seed Spec v1：同一個 seed 永遠解碼成相同棋盤大小、障礙比例、紅藍 AI、AI 參數與亂數序列。</div>
+    <div class="note">若該 seed 尚未由 ataxx_seed_runner 正式執行並上傳，Viewer 會顯示「尚未發布」，不會在瀏覽器臨時重算。</div>
   </section>
 
   <section class="card">
-    <h2>Seed 產生器</h2>
-    <div class="muted" style="margin-bottom:12px">先指定你想要的條件，系統會找出符合條件的 Master Seed。</div>
-    <div class="finder-grid">
-      <div class="field"><label for="findBoard">棋盤大小</label><select id="findBoard"><option value="">不限</option></select></div>
-      <div class="field"><label for="findDensity">障礙比例</label><select id="findDensity"><option value="">不限</option></select></div>
-      <div class="field"><label for="findRed">紅方方法</label><select id="findRed"><option value="">不限</option></select></div>
-      <div class="field"><label for="findBlue">藍方方法</label><select id="findBlue"><option value="">不限</option></select></div>
-      <div class="field"><label for="findCount">要幾個 Seed</label><input id="findCount" type="number" min="1" max="20" value="5"></div>
+    <h2>公式式 Seed 產生器</h2>
+    <div class="generator">
+      <div class="field"><label>棋盤大小</label><select id="boardSelect"></select></div>
+      <div class="field"><label>障礙比例</label><select id="densitySelect"></select></div>
+      <div class="field"><label>紅方方法</label><select id="redSelect"></select></div>
+      <div class="field"><label>藍方方法</label><select id="blueSelect"></select></div>
+      <div class="field"><label>Case ID</label><input id="caseInput" type="number" min="0" value="0"></div>
     </div>
-    <div class="finder-actions"><button id="findSeeds" type="button">產生符合條件的 Seed</button><button id="randomSeed" class="secondary" type="button">隨機給我一個 Seed</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <button id="generateBtn" type="button">公式產生 Seed</button>
+      <button id="loadGeneratedBtn" class="secondary" type="button">產生並載入已發布結果</button>
+    </div>
     <div class="seed-results" id="seedResults"></div>
-    <div class="note">目前 v1 Agent profiles：Random、Greedy、Alpha-Beta d=2/3/4。CNN、GNN、Self-play、PLR 等名稱已保留給未來新版規格，不會改寫 v1 舊 seed。</div>
+    <div class="note">這裡沒有搜尋 candidate seed。相同條件 + case_id 永遠得到相同 Master Seed。</div>
   </section>
 
-  <div class="status" id="status"></div>
-  <div class="error" id="error"></div>
+  <div id="status" class="status"></div>
+  <div id="error" class="error"></div>
 
   <div class="layout">
-    <div>
-      <div class="board-wrap"><div id="board"></div></div>
-      <div class="legend"><span><i class="dot red"></i><span id="redLegend">Red</span></span><span><i class="dot blue"></i><span id="blueLegend">Blue</span></span><span><i class="square"></i>障礙</span></div>
-    </div>
+    <div class="board-wrap"><div id="board"></div></div>
     <aside class="panel">
-      <div class="matchup" id="matchup">尚未載入</div>
-      <div class="spec" id="spec"></div>
-      <div class="stat-grid"><div class="stat"><span>回合</span><strong id="turn">0</strong></div><div class="stat"><span>進度</span><strong id="progressText">0 / 0</strong></div><div class="stat"><span>紅方棋子</span><strong id="redScore">0</strong></div><div class="stat"><span>藍方棋子</span><strong id="blueScore">0</strong></div></div>
-      <div class="move-box"><div class="muted" id="actor">開局</div><strong id="move">Initial position</strong></div>
-      <div class="controls"><button id="prev" type="button">上一手</button><button id="play" class="primary" type="button">播放</button><button id="next" type="button">下一手</button></div>
-      <label for="timeline">對局進度</label><input id="timeline" type="range" min="0" max="0" value="0" step="1">
-      <label for="speed">播放速度：<span id="speedText">1×</span></label><input id="speed" type="range" min="0.25" max="4" value="1" step="0.25">
-      <div class="muted" style="margin-top:14px" id="result"></div>
-      <div class="seed-nav"><button type="button" id="prevSeed">Seed - 1</button><button type="button" id="nextSeed">Seed + 1</button></div>
+      <div id="matchup" class="matchup">尚未載入</div>
+      <div id="spec" class="spec"></div>
+      <div class="stat-grid">
+        <div class="stat"><span>回合</span><strong id="turn">0</strong></div>
+        <div class="stat"><span>進度</span><strong id="progress">0 / 0</strong></div>
+        <div class="stat"><span>紅方棋子</span><strong id="redScore">0</strong></div>
+        <div class="stat"><span>藍方棋子</span><strong id="blueScore">0</strong></div>
+      </div>
+      <div class="move-box"><div id="actor" class="muted">開局</div><strong id="move">Initial position</strong></div>
+      <div class="controls"><button id="prev">上一手</button><button id="play" class="primary">播放</button><button id="next">下一手</button></div>
+      <input id="timeline" type="range" min="0" max="0" value="0" step="1">
+      <div id="result" class="muted" style="margin-top:14px"></div>
     </aside>
   </div>
 </div>
-
 <script src="seed-spec.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-const seedInput=$('seedInput'),seedForm=$('seedForm'),statusEl=$('status'),errorEl=$('error'),board=$('board'),matchup=$('matchup'),specEl=$('spec'),redLegend=$('redLegend'),blueLegend=$('blueLegend'),turnEl=$('turn'),progressText=$('progressText'),redScore=$('redScore'),blueScore=$('blueScore'),actor=$('actor'),moveEl=$('move'),prev=$('prev'),play=$('play'),next=$('next'),timeline=$('timeline'),speed=$('speed'),speedText=$('speedText'),result=$('result'),prevSeed=$('prevSeed'),nextSeed=$('nextSeed');
-const findBoard=$('findBoard'),findDensity=$('findDensity'),findRed=$('findRed'),findBlue=$('findBlue'),findCount=$('findCount'),findSeeds=$('findSeeds'),randomSeed=$('randomSeed'),seedResults=$('seedResults');
-let data=null,index=0,timer=null,currentSeed=0n,worker=null;
-
-function addOption(select,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;select.appendChild(o);}
-for(const n of AtaxxSeedSpec.BOARD_SIZES_V1)addOption(findBoard,String(n),`${n}×${n}`);
-for(const d of AtaxxSeedSpec.DENSITIES_V1)addOption(findDensity,String(d),`${d}%`);
-for(const a of AtaxxSeedSpec.AGENT_PROFILES_V1){addOption(findRed,a.id,a.label);addOption(findBlue,a.id,a.label);}
-
-function parseSeed(text){if(!/^\d+$/.test(String(text).trim()))throw new Error('Master Seed 必須是 0 到 18446744073709551615 的整數。');const x=BigInt(text);if(x<0n||x>18446744073709551615n)throw new Error('Master Seed 超出 uint64 範圍。');return x;}
-function stop(){if(timer!==null){clearInterval(timer);timer=null;}play.textContent='播放';}
-function renderBoard(text,n){board.replaceChildren();board.style.gridTemplateColumns=`repeat(${n},1fr)`;for(const v of text){const c=document.createElement('div');c.className=v==='#'?'cell blocked':'cell';if(v==='R'||v==='B'){const p=document.createElement('div');p.className=`piece ${v==='R'?'red':'blue'}`;c.appendChild(p);}board.appendChild(c);}}
-function render(){if(!data)return;const f=data.frames[index];renderBoard(f.board,data.spec.boardSize);turnEl.textContent=f.turn;progressText.textContent=`${index} / ${data.frames.length-1}`;redScore.textContent=f.red;blueScore.textContent=f.blue;actor.textContent=f.turn===0?'開局':`${f.player} · ${f.agent}`;moveEl.textContent=f.move;timeline.value=index;prev.disabled=index===0;next.disabled=index===data.frames.length-1;}
-function startPlayback(){if(!data)return;if(index>=data.frames.length-1){index=0;render();}stop();const delay=Math.max(120,Math.round(900/Number(speed.value)));timer=setInterval(()=>{if(index>=data.frames.length-1){stop();return;}index++;render();},delay);play.textContent='暫停';}
-
-function showDecoded(decoded){matchup.textContent=`${decoded.redAgent.label}（紅） vs ${decoded.blueAgent.label}（藍）`;specEl.innerHTML=`Master Seed：<b>${decoded.masterSeed}</b><br>Seed Spec：v${decoded.version}<br>棋盤：${decoded.boardSize}×${decoded.boardSize}<br>障礙比例：${decoded.densityPercent}%<br>Matchup ID：${decoded.matchupId}`;redLegend.textContent=`${decoded.redAgent.label} / Red`;blueLegend.textContent=`${decoded.blueAgent.label} / Blue`;}
-
-function loadSeed(seedText,pushUrl=true){stop();errorEl.textContent='';try{currentSeed=parseSeed(seedText);seedInput.value=String(currentSeed);const decoded=AtaxxSeedSpec.decode(currentSeed);showDecoded(decoded);statusEl.textContent='正在計算完整對局…';result.textContent='';if(worker)worker.terminate();worker=new Worker('worker.js');worker.onmessage=e=>{const msg=e.data;if(msg.type==='progress'){statusEl.textContent=`正在計算完整對局… 已完成 ${msg.turn} 手`;return;}if(msg.type==='error'){statusEl.textContent='';errorEl.textContent=msg.message;return;}if(msg.type==='done'){data=msg.result;index=0;timeline.max=data.frames.length-1;statusEl.textContent='對局計算完成。';result.textContent=`結果：${data.winner==='Draw'?'平手':data.winner+' 獲勝'} · ${data.frames.length-1} 回合 · ${data.blocked} 個障礙`;render();}};worker.onerror=()=>{statusEl.textContent='';errorEl.textContent='對局計算器發生錯誤，請重新整理頁面。';};worker.postMessage({masterSeed:String(currentSeed)});if(pushUrl)history.replaceState(null,'',`?seed=${currentSeed}`);}catch(err){statusEl.textContent='';errorEl.textContent=err.message;}}
-
-function randomUint64(){const a=new Uint32Array(2);crypto.getRandomValues(a);return(BigInt(a[0])<<32n)|BigInt(a[1]);}
-function generateSeeds(){seedResults.replaceChildren();errorEl.textContent='';const count=Math.max(1,Math.min(20,Number(findCount.value)||1));const filters={boardSize:findBoard.value,densityPercent:findDensity.value,redAgent:findRed.value,blueAgent:findBlue.value};let candidate=randomUint64(),checked=0,found=0;const limit=1000000;while(checked<limit&&found<count){const d=AtaxxSeedSpec.decode(candidate);if(AtaxxSeedSpec.matches(d,filters)){const b=document.createElement('button');b.type='button';b.className='seed-chip';b.textContent=String(candidate);b.title=`${d.boardSize}×${d.boardSize}, ${d.densityPercent}%, ${d.redAgent.label} vs ${d.blueAgent.label}`;b.addEventListener('click',()=>loadSeed(String(candidate)));seedResults.appendChild(b);found++;}candidate=BigInt.asUintN(64,candidate+1n);checked++;}statusEl.textContent=found?`找到 ${found} 個符合條件的 Seed（檢查 ${checked} 個候選）。`:`找不到符合條件的 Seed。`;}
-
-seedForm.addEventListener('submit',e=>{e.preventDefault();loadSeed(seedInput.value);});
-findSeeds.addEventListener('click',generateSeeds);
-randomSeed.addEventListener('click',()=>loadSeed(String(randomUint64())));
-prev.addEventListener('click',()=>{stop();if(index>0)index--;render();});next.addEventListener('click',()=>{stop();if(data&&index<data.frames.length-1)index++;render();});play.addEventListener('click',()=>timer===null?startPlayback():stop());timeline.addEventListener('input',()=>{stop();index=Number(timeline.value);render();});speed.addEventListener('input',()=>{speedText.textContent=`${Number(speed.value).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')}×`;if(timer!==null)startPlayback();});prevSeed.addEventListener('click',()=>{if(currentSeed>0n)loadSeed(String(currentSeed-1n));});nextSeed.addEventListener('click',()=>{if(currentSeed<18446744073709551615n)loadSeed(String(currentSeed+1n));});
-
-const params=new URLSearchParams(location.search);if(params.has('seed'))seedInput.value=params.get('seed');loadSeed(seedInput.value,false);
+const boardSelect=$('boardSelect'),densitySelect=$('densitySelect'),redSelect=$('redSelect'),blueSelect=$('blueSelect'),caseInput=$('caseInput'),seedInput=$('seedInput');
+let data=null,index=0,timer=null;
+function opt(select,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;select.appendChild(o)}
+AtaxxSeedSpec.BOARD_SIZES.forEach(x=>opt(boardSelect,x,`${x}×${x}`));
+AtaxxSeedSpec.DENSITIES.forEach(x=>opt(densitySelect,x,`${x}%`));
+AtaxxSeedSpec.AGENTS.forEach(x=>{opt(redSelect,x.id,x.label);opt(blueSelect,x.id,x.label)});
+function generatedSeed(){return AtaxxSeedSpec.encode({boardSize:Number(boardSelect.value),densityPercent:Number(densitySelect.value),redAgent:redSelect.value,blueAgent:blueSelect.value,caseId:BigInt(caseInput.value||0)})}
+function showGenerated(seed){const d=AtaxxSeedSpec.decode(seed);$('seedResults').innerHTML='';const b=document.createElement('button');b.className='seed-chip';b.textContent=String(seed);b.onclick=()=>loadSeed(seed);$('seedResults').appendChild(b);$('status').textContent=`Seed ${seed} = ${d.boardSize}×${d.boardSize}, ${d.densityPercent}%, ${d.redAgent.label} vs ${d.blueAgent.label}, case ${d.caseId}`;return seed}
+function renderBoard(text,n){const el=$('board');el.replaceChildren();el.style.gridTemplateColumns=`repeat(${n},1fr)`;for(const v of text){const c=document.createElement('div');c.className=v==='#'?'cell blocked':'cell';if(v==='R'||v==='B'){const p=document.createElement('div');p.className=`piece ${v==='R'?'red':'blue'}`;c.appendChild(p)}el.appendChild(c)}}
+function render(){if(!data)return;const f=data.frames[index];renderBoard(f.board,data.board_size);$('turn').textContent=f.turn;$('progress').textContent=`${index} / ${data.frames.length-1}`;$('redScore').textContent=f.red;$('blueScore').textContent=f.blue;$('actor').textContent=f.player==='Start'?'開局':`${f.player} · ${f.agent}`;$('move').textContent=f.move;$('timeline').value=index;$('prev').disabled=index===0;$('next').disabled=index===data.frames.length-1}
+function stop(){if(timer!==null){clearInterval(timer);timer=null}$('play').textContent='播放'}
+function start(){if(!data)return;if(index>=data.frames.length-1)index=0;stop();timer=setInterval(()=>{if(index>=data.frames.length-1){stop();return}index++;render()},700);$('play').textContent='暫停'}
+async function loadSeed(seedValue){stop();$('error').textContent='';const seed=BigInt(seedValue);seedInput.value=String(seed);const decoded=AtaxxSeedSpec.decode(seed);$('status').textContent='正在讀取已發布資料…';try{const r=await fetch(`data/runs/${seed}.json`,{cache:'no-store'});if(!r.ok)throw new Error('NOT_PUBLISHED');const x=await r.json();if(String(x.seed)!==String(seed)||x.spec_version!==2)throw new Error('INVALID_DATA');data=x;index=0;$('timeline').max=x.frames.length-1;$('matchup').textContent=`${x.red_agent.label}（紅） vs ${x.blue_agent.label}（藍）`;$('spec').innerHTML=`Master Seed：<b>${x.seed}</b><br>Case ID：${x.case_id}<br>棋盤：${x.board_size}×${x.board_size}<br>障礙比例：${x.density_percent}%<br>Seed Spec：v${x.spec_version}`;$('result').textContent=`結果：${x.winner} · ${x.turns} 回合 · ${x.blocked} 個障礙 · ${x.total_search_nodes} search nodes`;$('status').textContent='已載入正式保存的模擬資料。';render();history.replaceState(null,'',`?seed=${seed}`)}catch(e){data=null;$('status').textContent='';$('error').textContent=e.message==='NOT_PUBLISHED'?`Seed ${seed} 尚未發布正式模擬資料。請先用 ataxx_seed_runner 執行並將 JSON 上傳 Viewer。`:'資料格式錯誤或載入失敗。';$('matchup').textContent=`${decoded.redAgent.label} vs ${decoded.blueAgent.label}`;$('spec').textContent=`Seed ${seed} · case ${decoded.caseId}`}}
+$('generateBtn').onclick=()=>showGenerated(generatedSeed());
+$('loadGeneratedBtn').onclick=()=>loadSeed(showGenerated(generatedSeed()));
+$('seedForm').onsubmit=e=>{e.preventDefault();if(/^\d+$/.test(seedInput.value.trim()))loadSeed(BigInt(seedInput.value.trim()));else $('error').textContent='Master Seed 必須是非負整數。'};
+$('prev').onclick=()=>{stop();if(index>0)index--;render()};$('next').onclick=()=>{stop();if(data&&index<data.frames.length-1)index++;render()};$('play').onclick=()=>timer===null?start():stop();$('timeline').oninput=()=>{stop();index=Number($('timeline').value);render()};
+const params=new URLSearchParams(location.search);if(params.has('seed')){seedInput.value=params.get('seed');loadSeed(BigInt(seedInput.value))}
 </script>
 </body>
 </html>
