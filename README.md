@@ -4,23 +4,43 @@
 
 ## 直接使用
 
-👉 **https://jjeremytang.github.io/ataxx-varbench-viewer/**
+https://jjeremytang.github.io/ataxx-varbench-viewer/
 
-Viewer 採用類似 Minecraft world seed 的概念：
+## 現在的正式架構
 
-> 一個 Master Seed 直接決定完整實驗設定與對局。
+Viewer 已改成 **read-only**：它不再自己執行 Alpha-Beta 或模擬完整對局。
 
-目前 Seed Spec v1 會由 Master Seed 固定決定：
+正式流程是：
 
-- 棋盤大小：10×10、12×12、15×15
-- 障礙比例：10%、15%、20%、25%、30%
-- 障礙布局
+```text
+條件 + case_id
+→ Seed Spec v2 公式產生 Master Seed
+→ private ataxx-varbench 的 C++ ataxx_seed_runner
+→ 正式模擬完整對局
+→ 儲存 JSON
+→ 上傳 viewer/data/runs/
+→ Viewer 讀取與回放
+```
+
+這樣研究結果只有一個權威來源：private repo 的 C++ `Game / LevelGenerator / SearchEngine`。
+
+## Seed Spec v2
+
+v2 不再「隨機找一個符合條件的 seed」。
+
+Master Seed 直接編碼：
+
+- 棋盤大小
+- 障礙比例
 - 紅方 Agent
 - 藍方 Agent
-- Alpha-Beta depth
-- Random Agent 的 RNG seed
+- case_id
 
-### Seed Spec v1 Agent profiles
+因此：
+
+> 相同條件 + 相同 case_id 永遠產生相同 Master Seed。
+
+目前 profiles：
 
 - Random
 - Greedy
@@ -28,45 +48,43 @@ Viewer 採用類似 Minecraft world seed 的概念：
 - Alpha-Beta d=3
 - Alpha-Beta d=4
 
-因此同一個 Master Seed 在 Seed Spec v1 下會得到同一組設定與同一場可重現對局。
+## Viewer 的 Seed 產生器
 
-## Seed 產生器
+網頁上的 Seed 產生器只做數學公式編碼，不掃描 candidate、不用亂數碰運氣。
 
-除了直接輸入 Master Seed，也可以先指定條件，再要求 Viewer 找出符合條件的 seed。目前可以篩選：
+若產生的 seed 尚未存在於：
 
-- 棋盤大小
-- 障礙比例
-- 紅方方法
-- 藍方方法
-- 要產生的 seed 數量
+```text
+data/runs/<seed>.json
+```
 
-找到 seed 後，直接點 seed 即可載入該場對局。
+Viewer 會顯示「尚未發布正式模擬資料」，而不在瀏覽器自行重算。
 
-## 未來擴充
+## 正式產生一筆資料
 
-Seed Spec v1 規格固定，不會因為日後加入新模型而改寫舊 seed 的意義。
+在 private `ataxx-varbench` build 完成後，例如：
 
-目前已預留未來方法名稱，例如：
+```powershell
+.\build\ataxx_seed_runner.exe generate-run 10 20 ab2 ab4 37 ..\ataxx-varbench-viewer\data\runs
+```
 
-- CNN
-- GNN
-- Self-play
-- PLR
-- topology-aware PLR
+這個指令會：
 
-未來若加入新的 Agent 組合，應建立新版 Seed Spec，而不是修改 v1 的映射。
+1. 由條件與 case_id 公式算出 Master Seed
+2. 解碼該 seed
+3. 建立固定棋盤
+4. 使用正式 C++ Agent 跑完整對局
+5. 儲存 `data/runs/<seed>.json`
 
-## Viewer
+之後把新增 JSON commit / push 到本 repo，GitHub Pages 就能查詢。
 
-完整對局計算由 Web Worker 執行，避免 Alpha-Beta 搜尋阻塞頁面。Viewer 支援：
+## 設計原則
 
-- 播放／暫停
-- 上一手／下一手
-- 時間軸
-- 播放速度
-- Seed - 1 / Seed + 1
-- URL 保存 Master Seed
+`SeedSpec ≠ Simulation ≠ Viewer`
 
-## 說明
+- SeedSpec：定義實驗 ID / 條件
+- Simulation：正式計算結果
+- SeedStore：保存 JSON
+- Viewer：只負責查詢與回放
 
-此 repository 只放公開 Viewer，不包含 private `ataxx-varbench` 的研究程式碼。
+這樣避免 browser JavaScript engine 與研究 C++ engine 逐漸產生差異。
