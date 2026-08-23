@@ -1,5 +1,16 @@
 {
   "spec_version": 2,
-  "count": 0,
-  "runs": []
+  "count": 1,
+  "runs": [
+    {
+      "seed": "1096",
+      "case_id": "0",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 122
+    }
+  ]
 }
