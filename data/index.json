@@ -1,6 +1,6 @@
 {
   "spec_version": 2,
-  "count": 10,
+  "count": 100,
   "runs": [
     {
       "seed": "1096",
@@ -101,6 +101,906 @@
       "blue_agent": "ab4",
       "winner": "Draw",
       "turns": 110
+    },
+    {
+      "seed": "21576",
+      "case_id": "10",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 122
+    },
+    {
+      "seed": "23624",
+      "case_id": "11",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "25672",
+      "case_id": "12",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 111
+    },
+    {
+      "seed": "27720",
+      "case_id": "13",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 133
+    },
+    {
+      "seed": "29768",
+      "case_id": "14",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 106
+    },
+    {
+      "seed": "31816",
+      "case_id": "15",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 126
+    },
+    {
+      "seed": "33864",
+      "case_id": "16",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 148
+    },
+    {
+      "seed": "35912",
+      "case_id": "17",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 140
+    },
+    {
+      "seed": "37960",
+      "case_id": "18",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 135
+    },
+    {
+      "seed": "40008",
+      "case_id": "19",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 133
+    },
+    {
+      "seed": "42056",
+      "case_id": "20",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 135
+    },
+    {
+      "seed": "44104",
+      "case_id": "21",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 105
+    },
+    {
+      "seed": "46152",
+      "case_id": "22",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "48200",
+      "case_id": "23",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 133
+    },
+    {
+      "seed": "50248",
+      "case_id": "24",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 128
+    },
+    {
+      "seed": "52296",
+      "case_id": "25",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Red",
+      "turns": 115
+    },
+    {
+      "seed": "54344",
+      "case_id": "26",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 122
+    },
+    {
+      "seed": "56392",
+      "case_id": "27",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 118
+    },
+    {
+      "seed": "58440",
+      "case_id": "28",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 137
+    },
+    {
+      "seed": "60488",
+      "case_id": "29",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 121
+    },
+    {
+      "seed": "62536",
+      "case_id": "30",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 118
+    },
+    {
+      "seed": "64584",
+      "case_id": "31",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 135
+    },
+    {
+      "seed": "66632",
+      "case_id": "32",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "68680",
+      "case_id": "33",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 142
+    },
+    {
+      "seed": "70728",
+      "case_id": "34",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 117
+    },
+    {
+      "seed": "72776",
+      "case_id": "35",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "74824",
+      "case_id": "36",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 110
+    },
+    {
+      "seed": "76872",
+      "case_id": "37",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 129
+    },
+    {
+      "seed": "78920",
+      "case_id": "38",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 114
+    },
+    {
+      "seed": "80968",
+      "case_id": "39",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 140
+    },
+    {
+      "seed": "83016",
+      "case_id": "40",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 122
+    },
+    {
+      "seed": "85064",
+      "case_id": "41",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 115
+    },
+    {
+      "seed": "87112",
+      "case_id": "42",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 106
+    },
+    {
+      "seed": "89160",
+      "case_id": "43",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 112
+    },
+    {
+      "seed": "91208",
+      "case_id": "44",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 97
+    },
+    {
+      "seed": "93256",
+      "case_id": "45",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 127
+    },
+    {
+      "seed": "95304",
+      "case_id": "46",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 113
+    },
+    {
+      "seed": "97352",
+      "case_id": "47",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 132
+    },
+    {
+      "seed": "99400",
+      "case_id": "48",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 122
+    },
+    {
+      "seed": "101448",
+      "case_id": "49",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 114
+    },
+    {
+      "seed": "103496",
+      "case_id": "50",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 123
+    },
+    {
+      "seed": "105544",
+      "case_id": "51",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 130
+    },
+    {
+      "seed": "107592",
+      "case_id": "52",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 113
+    },
+    {
+      "seed": "109640",
+      "case_id": "53",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 123
+    },
+    {
+      "seed": "111688",
+      "case_id": "54",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 129
+    },
+    {
+      "seed": "113736",
+      "case_id": "55",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "115784",
+      "case_id": "56",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "117832",
+      "case_id": "57",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 128
+    },
+    {
+      "seed": "119880",
+      "case_id": "58",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 122
+    },
+    {
+      "seed": "121928",
+      "case_id": "59",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "123976",
+      "case_id": "60",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 121
+    },
+    {
+      "seed": "126024",
+      "case_id": "61",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 134
+    },
+    {
+      "seed": "128072",
+      "case_id": "62",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "130120",
+      "case_id": "63",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 132
+    },
+    {
+      "seed": "132168",
+      "case_id": "64",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 121
+    },
+    {
+      "seed": "134216",
+      "case_id": "65",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Red",
+      "turns": 110
+    },
+    {
+      "seed": "136264",
+      "case_id": "66",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 114
+    },
+    {
+      "seed": "138312",
+      "case_id": "67",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Red",
+      "turns": 114
+    },
+    {
+      "seed": "140360",
+      "case_id": "68",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 140
+    },
+    {
+      "seed": "142408",
+      "case_id": "69",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 120
+    },
+    {
+      "seed": "144456",
+      "case_id": "70",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 145
+    },
+    {
+      "seed": "146504",
+      "case_id": "71",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 126
+    },
+    {
+      "seed": "148552",
+      "case_id": "72",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 138
+    },
+    {
+      "seed": "150600",
+      "case_id": "73",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 138
+    },
+    {
+      "seed": "152648",
+      "case_id": "74",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "154696",
+      "case_id": "75",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 131
+    },
+    {
+      "seed": "156744",
+      "case_id": "76",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "158792",
+      "case_id": "77",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 128
+    },
+    {
+      "seed": "160840",
+      "case_id": "78",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 126
+    },
+    {
+      "seed": "162888",
+      "case_id": "79",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 126
+    },
+    {
+      "seed": "164936",
+      "case_id": "80",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 130
+    },
+    {
+      "seed": "166984",
+      "case_id": "81",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 127
+    },
+    {
+      "seed": "169032",
+      "case_id": "82",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 120
+    },
+    {
+      "seed": "171080",
+      "case_id": "83",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 135
+    },
+    {
+      "seed": "173128",
+      "case_id": "84",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 124
+    },
+    {
+      "seed": "175176",
+      "case_id": "85",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "177224",
+      "case_id": "86",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 130
+    },
+    {
+      "seed": "179272",
+      "case_id": "87",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 111
+    },
+    {
+      "seed": "181320",
+      "case_id": "88",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 114
+    },
+    {
+      "seed": "183368",
+      "case_id": "89",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "185416",
+      "case_id": "90",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 117
+    },
+    {
+      "seed": "187464",
+      "case_id": "91",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 116
+    },
+    {
+      "seed": "189512",
+      "case_id": "92",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Draw",
+      "turns": 115
+    },
+    {
+      "seed": "191560",
+      "case_id": "93",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 108
+    },
+    {
+      "seed": "193608",
+      "case_id": "94",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 132
+    },
+    {
+      "seed": "195656",
+      "case_id": "95",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 134
+    },
+    {
+      "seed": "197704",
+      "case_id": "96",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 122
+    },
+    {
+      "seed": "199752",
+      "case_id": "97",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 132
+    },
+    {
+      "seed": "201800",
+      "case_id": "98",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 115
+    },
+    {
+      "seed": "203848",
+      "case_id": "99",
+      "board_size": 10,
+      "density_percent": 20,
+      "red_agent": "ab2",
+      "blue_agent": "ab4",
+      "winner": "Blue",
+      "turns": 133
     }
   ]
 }
