@@ -1,0 +1,164 @@
+#include "search.hpp"
+
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <vector>
+
+using namespace std;
+
+namespace {
+constexpr int WIN_SCORE = 1000000;
+
+int move_order_score(const Game& game, const Move& move) {
+  if (move.type == MoveType::Pass || !move.to.has_value()) {
+    return 0;
+  }
+
+  int score = move.type == MoveType::Clone ? 1 : 0;
+  Cell enemy = game.current_player() == Player::Red ? Cell::Blue : Cell::Red;
+  Position to = *move.to;
+
+  for (int dr = -1; dr <= 1; dr++) {
+    for (int dc = -1; dc <= 1; dc++) {
+      Position pos{to.row + dr, to.col + dc};
+      if (game.in_bounds(pos) && game.at(pos) == enemy) {
+        score += 2;
+      }
+    }
+  }
+
+  return score;
+}
+}
+
+SearchResult SearchEngine::search(const Game& game, int depth) {
+  if (depth < 1) {
+    throw invalid_argument("Search depth must be at least 1.");
+  }
+
+  nodes_ = 0;
+  Player root_player = game.current_player();
+  vector<Move> moves = game.legal_moves();
+
+  if (game.is_terminal()) {
+    nodes_ = 1;
+    return SearchResult{Move::pass(), evaluate(game, root_player), depth, nodes_};
+  }
+
+  if (moves.empty()) {
+    Game child = game;
+    bool applied = child.apply_move(Move::pass());
+    if (!applied) {
+      throw runtime_error("Failed to apply forced pass during search.");
+    }
+    int score = alpha_beta(
+        child,
+        depth - 1,
+        numeric_limits<int>::min() / 2,
+        numeric_limits<int>::max() / 2,
+        root_player);
+    return SearchResult{Move::pass(), score, depth, nodes_};
+  }
+
+  Move best_move = moves.front();
+  int best_score = numeric_limits<int>::min() / 2;
+  int alpha = numeric_limits<int>::min() / 2;
+  int beta = numeric_limits<int>::max() / 2;
+
+  for (const Move& move : moves) {
+    Game child = game;
+    if (!child.apply_move(move)) {
+      throw runtime_error("Search generated an illegal move.");
+    }
+
+    int score = alpha_beta(child, depth - 1, alpha, beta, root_player);
+    if (score > best_score) {
+      best_score = score;
+      best_move = move;
+    }
+    alpha = max(alpha, best_score);
+  }
+
+  return SearchResult{best_move, best_score, depth, nodes_};
+}
+
+int SearchEngine::alpha_beta(
+    const Game& game,
+    int depth,
+    int alpha,
+    int beta,
+    Player root_player) {
+  nodes_++;
+
+  if (depth == 0 || game.is_terminal()) {
+    return evaluate(game, root_player);
+  }
+
+  vector<Move> moves = game.legal_moves();
+  if (moves.empty()) {
+    Game child = game;
+    if (!child.apply_move(Move::pass())) {
+      throw runtime_error("Failed to apply forced pass during Alpha-Beta.");
+    }
+    return alpha_beta(child, depth - 1, alpha, beta, root_player);
+  }
+
+  stable_sort(moves.begin(), moves.end(), [&game](const Move& a, const Move& b) {
+    return move_order_score(game, a) > move_order_score(game, b);
+  });
+
+  bool maximizing = game.current_player() == root_player;
+
+  if (maximizing) {
+    int best = numeric_limits<int>::min() / 2;
+    for (const Move& move : moves) {
+      Game child = game;
+      if (!child.apply_move(move)) {
+        throw runtime_error("Search generated an illegal maximizing move.");
+      }
+      best = max(best, alpha_beta(child, depth - 1, alpha, beta, root_player));
+      alpha = max(alpha, best);
+      if (alpha >= beta) {
+        break;
+      }
+    }
+    return best;
+  }
+
+  int best = numeric_limits<int>::max() / 2;
+  for (const Move& move : moves) {
+    Game child = game;
+    if (!child.apply_move(move)) {
+      throw runtime_error("Search generated an illegal minimizing move.");
+    }
+    best = min(best, alpha_beta(child, depth - 1, alpha, beta, root_player));
+    beta = min(beta, best);
+    if (alpha >= beta) {
+      break;
+    }
+  }
+  return best;
+}
+
+int SearchEngine::evaluate(const Game& game, Player root_player) const {
+  if (game.is_repetition_draw()) {
+    return 0;
+  }
+
+  Cell own = root_player == Player::Red ? Cell::Red : Cell::Blue;
+  Cell enemy = root_player == Player::Red ? Cell::Blue : Cell::Red;
+  int piece_diff = game.count(own) - game.count(enemy);
+
+  if (!game.is_terminal()) {
+    return piece_diff;
+  }
+
+  optional<Player> winner = game.winner();
+  if (!winner.has_value()) {
+    return piece_diff;
+  }
+  return *winner == root_player
+      ? WIN_SCORE + piece_diff
+      : -WIN_SCORE + piece_diff;
+}
