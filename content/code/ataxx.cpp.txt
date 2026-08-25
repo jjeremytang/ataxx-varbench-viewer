@@ -1,0 +1,300 @@
+#include "ataxx.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+Move Move::pass() {
+  return Move{MoveType::Pass, nullopt, nullopt};
+}
+
+Move Move::normal(Position from, Position to, MoveType type) {
+  return Move{type, from, to};
+}
+
+Game::Game(const VariantConfig& config) {
+  if (config.board_size < 4) {
+    throw invalid_argument("Board size must be at least 4.");
+  }
+
+  size_ = config.board_size;
+  board_.assign(size_, vector<Cell>(size_, Cell::Empty));
+
+  vector<Position> red_start;
+  vector<Position> blue_start;
+
+  if (config.start_layout == StartLayout::Standard) {
+    red_start = {{0, 0}, {size_ - 1, size_ - 1}};
+    blue_start = {{0, size_ - 1}, {size_ - 1, 0}};
+  } else {
+    red_start = {{1, 1}, {size_ - 2, size_ - 2}};
+    blue_start = {{1, size_ - 2}, {size_ - 2, 1}};
+  }
+
+  for (Position pos : config.blocked) {
+    if (!in_bounds(pos)) {
+      throw invalid_argument("Blocked position is outside the board.");
+    }
+    board_[pos.row][pos.col] = Cell::Blocked;
+  }
+
+  for (Position pos : red_start) {
+    if (board_[pos.row][pos.col] == Cell::Blocked) {
+      throw invalid_argument("A blocked square overlaps a starting piece.");
+    }
+    board_[pos.row][pos.col] = Cell::Red;
+  }
+
+  for (Position pos : blue_start) {
+    if (board_[pos.row][pos.col] == Cell::Blocked) {
+      throw invalid_argument("A blocked square overlaps a starting piece.");
+    }
+    board_[pos.row][pos.col] = Cell::Blue;
+  }
+
+  record_position();
+}
+
+int Game::size() const {
+  return size_;
+}
+
+Player Game::current_player() const {
+  return current_player_;
+}
+
+int Game::move_count() const {
+  return move_count_;
+}
+
+int Game::consecutive_passes() const {
+  return consecutive_passes_;
+}
+
+bool Game::in_bounds(Position pos) const {
+  return pos.row >= 0 && pos.row < size_
+      && pos.col >= 0 && pos.col < size_;
+}
+
+Cell Game::at(Position pos) const {
+  if (!in_bounds(pos)) {
+    throw out_of_range("Position is outside the board.");
+  }
+  return board_[pos.row][pos.col];
+}
+
+vector<Move> Game::legal_moves() const {
+  vector<Move> moves;
+  if (is_terminal()) {
+    return moves;
+  }
+
+  Cell own = player_cell(current_player_);
+  for (int row = 0; row < size_; row++) {
+    for (int col = 0; col < size_; col++) {
+      if (board_[row][col] != own) {
+        continue;
+      }
+
+      for (int dr = -2; dr <= 2; dr++) {
+        for (int dc = -2; dc <= 2; dc++) {
+          int distance = max(abs(dr), abs(dc));
+          if (distance == 0 || distance > 2) {
+            continue;
+          }
+
+          Position to{row + dr, col + dc};
+          if (!in_bounds(to) || board_[to.row][to.col] != Cell::Empty) {
+            continue;
+          }
+
+          MoveType type = distance == 1 ? MoveType::Clone : MoveType::Jump;
+          moves.push_back(Move::normal({row, col}, to, type));
+        }
+      }
+    }
+  }
+
+  return moves;
+}
+
+bool Game::apply_move(const Move& move) {
+  if (is_terminal()) {
+    return false;
+  }
+
+  if (move.type == MoveType::Pass) {
+    if (!legal_moves().empty() || move.from.has_value() || move.to.has_value()) {
+      return false;
+    }
+
+    consecutive_passes_++;
+    move_count_++;
+    current_player_ = current_player_ == Player::Red
+        ? Player::Blue : Player::Red;
+    record_position();
+    return true;
+  }
+
+  if (!move.from.has_value() || !move.to.has_value()) {
+    return false;
+  }
+
+  Position from = *move.from;
+  Position to = *move.to;
+  if (!in_bounds(from) || !in_bounds(to)) {
+    return false;
+  }
+  if (board_[from.row][from.col] != player_cell(current_player_)) {
+    return false;
+  }
+  if (board_[to.row][to.col] != Cell::Empty) {
+    return false;
+  }
+
+  int distance = max(abs(from.row - to.row), abs(from.col - to.col));
+  MoveType expected_type;
+  if (distance == 1) {
+    expected_type = MoveType::Clone;
+  } else if (distance == 2) {
+    expected_type = MoveType::Jump;
+  } else {
+    return false;
+  }
+
+  if (move.type != expected_type) {
+    return false;
+  }
+
+  Cell own = player_cell(current_player_);
+  if (move.type == MoveType::Jump) {
+    board_[from.row][from.col] = Cell::Empty;
+  }
+  board_[to.row][to.col] = own;
+  infect_around(to);
+
+  consecutive_passes_ = 0;
+  move_count_++;
+  current_player_ = current_player_ == Player::Red
+      ? Player::Blue : Player::Red;
+  record_position();
+  return true;
+}
+
+int Game::count(Cell cell) const {
+  int total = 0;
+  for (const auto& row : board_) {
+    total += static_cast<int>(std::count(row.begin(), row.end(), cell));
+  }
+  return total;
+}
+
+bool Game::is_terminal() const {
+  if (repetition_draw_) {
+    return true;
+  }
+  if (count(Cell::Red) == 0 || count(Cell::Blue) == 0) {
+    return true;
+  }
+  if (count(Cell::Empty) == 0) {
+    return true;
+  }
+  return consecutive_passes_ >= 2;
+}
+
+bool Game::is_repetition_draw() const {
+  return repetition_draw_;
+}
+
+optional<Player> Game::winner() const {
+  if (!is_terminal()) {
+    return nullopt;
+  }
+  if (repetition_draw_) {
+    return nullopt;
+  }
+
+  int red = count(Cell::Red);
+  int blue = count(Cell::Blue);
+  if (red == blue) {
+    return nullopt;
+  }
+  return red > blue ? Player::Red : Player::Blue;
+}
+
+pair<int, int> Game::score() const {
+  return {count(Cell::Red), count(Cell::Blue)};
+}
+
+void Game::print() const {
+  cout << "  ";
+  for (int col = 0; col < size_; col++) {
+    cout << col << ' ';
+  }
+  cout << '\n';
+
+  for (int row = 0; row < size_; row++) {
+    cout << row << ' ';
+    for (int col = 0; col < size_; col++) {
+      char symbol = '.';
+      if (board_[row][col] == Cell::Red) {
+        symbol = 'R';
+      } else if (board_[row][col] == Cell::Blue) {
+        symbol = 'B';
+      } else if (board_[row][col] == Cell::Blocked) {
+        symbol = '#';
+      }
+      cout << symbol << ' ';
+    }
+    cout << '\n';
+  }
+}
+
+Cell Game::player_cell(Player player) const {
+  return player == Player::Red ? Cell::Red : Cell::Blue;
+}
+
+Cell Game::opponent_cell(Player player) const {
+  return player == Player::Red ? Cell::Blue : Cell::Red;
+}
+
+void Game::infect_around(Position destination) {
+  Cell own = player_cell(current_player_);
+  Cell enemy = opponent_cell(current_player_);
+
+  for (int dr = -1; dr <= 1; dr++) {
+    for (int dc = -1; dc <= 1; dc++) {
+      Position pos{destination.row + dr, destination.col + dc};
+      if (in_bounds(pos) && board_[pos.row][pos.col] == enemy) {
+        board_[pos.row][pos.col] = own;
+      }
+    }
+  }
+}
+
+string Game::position_key() const {
+  string key;
+  key.reserve(size_ * size_ + 8);
+  for (int row = 0; row < size_; row++) {
+    for (int col = 0; col < size_; col++) {
+      Cell cell = board_[row][col];
+      key += cell == Cell::Red ? 'R'
+          : cell == Cell::Blue ? 'B'
+          : cell == Cell::Blocked ? '#'
+          : '.';
+    }
+  }
+  key += current_player_ == Player::Red ? "|R|" : "|B|";
+  key += to_string(consecutive_passes_);
+  return key;
+}
+
+void Game::record_position() {
+  string key = position_key();
+  if (!seen_positions_.insert(key).second) {
+    repetition_draw_ = true;
+  }
+}
