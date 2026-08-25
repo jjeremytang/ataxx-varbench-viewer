@@ -1,0 +1,111 @@
+# ATAXX 協作工作流程
+
+本文件定義研究者與 ChatGPT 的固定協作規則。即時進度請看 `PROJECT_STATUS.md`；全域規格與版本規則請看 `SPEC.md`。
+
+## 1. 固定流程
+
+所有任務依照：
+
+`PLAN → IMPLEMENT → VERIFY → RUN → ANALYZE → DOCUMENT`
+
+- 一次只處理一個主要 Current Task。
+- 前一階段未驗證完成，不直接進入下一階段。
+- 大量實驗前先做小規模 smoke test。
+
+## 2. 分工
+
+### ChatGPT
+
+- 研究方法規劃
+- 程式設計與修改
+- GitHub 維護
+- GitHub Actions workflow
+- 資料驗證與統計分析
+- 文件與進度整理
+
+### 研究者
+
+- 理解研究內容
+- 確認研究目的
+- 決定重大研究方向
+- 僅在工具或權限限制時進行必要的手動操作
+
+## 3. 每次開始工作
+
+開始前先確認：
+
+- Current Phase
+- Current Task
+- Status
+- Completion Criteria
+- Next
+
+研究者說「繼續」時，原則上繼續目前 Current Task，不另開新支線。
+
+## 4. 完成狀態
+
+- **未完成**：尚未執行、正在執行或執行失敗。
+- **已修改、未驗證**：程式或 GitHub 已修改，但尚未經過 build/test/validator。
+- **已驗證完成**：程式、workflow 或資料已實際驗證通過。
+
+不得把「已寫程式」描述成「已完成」。
+
+## 5. 規格與 GitHub 權威來源
+
+- `SPEC.md`：目前全域語義／版本規格。
+- task-specific frozen protocol：已完成正式實驗的不可回寫條件。
+- `spec/project_spec.json`：可由 CI 驗證的規格常數與 artifact provenance。
+- `PROJECT_STATUS.md`：唯一正式即時進度來源。
+- `docs/code_registry.md`：程式／workflow 的 current / frozen / legacy 分級。
+- README、PROJECT.md、logs 不重複維護 Current Task 或 runtime constants。
+
+每完成重要工作，同步更新 `PROJECT_STATUS.md`。新對話開始時，先讀 `PROJECT_STATUS.md`，涉及語義或版本時再讀 `SPEC.md`。
+
+## 6. 資料分類
+
+- `pilot`：流程測試與早期探索，不作正式研究結論。
+- `formal`：通過驗證後的正式實驗資料。
+- `probe`：Search Instability / Volatility 原始量測資料。
+- `derived`：由原始資料計算出的統計與衍生資料。
+- `diagnostics`：workflow、validator、smoke test 等工程診斷資料。
+
+不同用途、不同版本的資料不得混用。
+
+## 7. Semantic change control
+
+以下變更視為 **semantic change**：
+
+- 遊戲規則／終局／repetition semantics；
+- legal-move ordering 或 best-move tie-breaking；
+- evaluation function / Alpha-Beta semantics；
+- detector feature / preprocessing / coefficient / applicability domain；
+- threshold / gating policy；
+- sampling distribution / opening generation；
+- formal output interpretation。
+
+Semantic change 必須：
+
+1. PLAN 說明變更原因；
+2. IMPLEMENT 使用新 implementation/schema/protocol version；
+3. VERIFY build/test/parity/validator；
+4. 必要時重新 smoke；
+5. 之後才能 RUN 新正式資料。
+
+已完成的 frozen raw artifact 不得為了「補新欄位」直接覆寫。需要補充時，另建 derived manifest / analysis。
+
+## 8. Program status gate
+
+正式執行前需查 `docs/code_registry.md`：
+
+- `authoritative-current` / `utility-current`：可在符合 protocol 的情況下使用；
+- `experiment-frozen`：重現舊實驗可使用；若要改，需 fork 新版本；
+- `legacy-pilot`：不得用於新的正式 claim；
+- `one-time-archive`：不得重新啟用為日常 workflow。
+
+## 9. 核心原則
+
+- 先定義問題，再寫程式。
+- 先驗證程式，再跑大量資料。
+- 先確認資料，再做研究結論。
+- 每次實驗都應可重現、可追蹤、可驗證。
+- 展示網站是 read-only presentation layer，不取代 private C++ engine / formal artifacts 的權威地位。
