@@ -1,4 +1,4 @@
-name: Deploy viewer to GitHub Pages
+name: Deploy research portal to GitHub Pages
 
 on:
   push:
@@ -23,12 +23,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate Seed Spec parity vectors
+        run: node tests/seed-spec.test.js
+
+      - name: Validate static catalog and navigation
+        run: node tests/site.test.js
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
