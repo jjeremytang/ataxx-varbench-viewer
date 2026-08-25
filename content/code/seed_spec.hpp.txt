@@ -1,0 +1,89 @@
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+enum class SeedAgentType {
+  Random,
+  Greedy,
+  AlphaBeta
+};
+
+struct SeedAgentProfile {
+  std::string id;
+  SeedAgentType type = SeedAgentType::Random;
+  int depth = 0;
+  std::string label;
+};
+
+struct SeedSpecV2 {
+  std::uint64_t seed = 0;
+  std::uint64_t case_id = 0;
+  int board_size = 10;
+  int density_percent = 10;
+  SeedAgentProfile red_agent;
+  SeedAgentProfile blue_agent;
+  std::uint64_t level_seed = 0;
+  std::uint64_t red_rng_seed = 0;
+  std::uint64_t blue_rng_seed = 0;
+};
+
+struct SeedRequestV2 {
+  int board_size = 10;
+  int density_percent = 10;
+  std::string red_agent_id = "random";
+  std::string blue_agent_id = "random";
+  std::uint64_t case_id = 0;
+};
+
+class SeedCodecV2 {
+ public:
+  static constexpr int kVersion = 2;
+  static constexpr std::uint64_t kMaxCaseId = (1ULL << 53) - 1;
+
+  static const std::vector<int>& board_sizes();
+  static const std::vector<int>& densities();
+  static const std::vector<SeedAgentProfile>& agents();
+
+  static std::uint64_t encode(const SeedRequestV2& request);
+  static SeedSpecV2 decode(std::uint64_t seed);
+  static std::uint64_t splitmix64(std::uint64_t value);
+};
+
+struct SeedSpecV3 {
+  std::uint64_t seed = 0;
+  std::uint64_t case_id = 0;
+  int board_size = 10;
+  int density_percent = 10;
+  SeedAgentProfile red_agent;
+  SeedAgentProfile blue_agent;
+  std::uint64_t world_key = 0;
+  std::uint64_t level_seed = 0;
+  std::uint64_t red_rng_seed = 0;
+  std::uint64_t blue_rng_seed = 0;
+};
+
+struct SeedRequestV3 {
+  int board_size = 10;
+  int density_percent = 10;
+  std::string red_agent_id = "random";
+  std::string blue_agent_id = "random";
+  std::uint64_t case_id = 0;
+};
+
+class SeedCodecV3 {
+ public:
+  static constexpr int kVersion = 3;
+  static constexpr std::uint64_t kVersionBit = 1ULL << 63;
+  static constexpr std::uint64_t kMaxCaseId = (1ULL << 52) - 1;
+
+  static const std::vector<int>& board_sizes();
+  static const std::vector<int>& densities();
+  static const std::vector<SeedAgentProfile>& agents();
+
+  static bool is_v3(std::uint64_t seed);
+  static std::uint64_t encode(const SeedRequestV3& request);
+  static SeedSpecV3 decode(std::uint64_t seed);
+  static std::uint64_t splitmix64(std::uint64_t value);
+};
