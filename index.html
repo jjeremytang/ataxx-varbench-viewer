@@ -3,84 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATAXX-VarBench Seed Viewer</title>
-<style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#f8fafc}.app{max-width:1180px;margin:auto;padding:22px}h1{margin:0 0 6px;font-size:28px}h2{margin:0 0 12px;font-size:20px}.muted{color:#94a3b8}.card,.board-wrap,.panel{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:18px 0}.seed-row{display:grid;grid-template-columns:1fr auto;gap:10px}.generator{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.field label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}input,select,button{width:100%;border:1px solid #475569;border-radius:10px;padding:11px 12px;font-size:15px;background:#0f172a;color:#fff}button{cursor:pointer;background:#2563eb;border-color:#2563eb;font-weight:600}.secondary{background:#334155;border-color:#334155}.seed-results{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.seed-chip{width:auto;background:#0f172a}.status{min-height:22px;color:#93c5fd;margin:10px 0}.error{min-height:22px;color:#fca5a5}.layout{display:grid;grid-template-columns:minmax(320px,700px) minmax(280px,1fr);gap:22px;align-items:start}.board-wrap{margin:0}.panel{margin:0}#board{display:grid;gap:3px;width:100%;aspect-ratio:1}.cell{display:grid;place-items:center;border-radius:5px;background:#cbd5e1}.cell.blocked{background:#334155}.piece{width:70%;height:70%;border-radius:50%}.piece.red{background:#ef4444}.piece.blue{background:#3b82f6}.matchup{font-weight:700;font-size:18px}.spec{line-height:1.7;color:#cbd5e1;margin-top:6px}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.stat,.move-box{background:#0f172a;border-radius:10px;padding:12px}.stat span{display:block;color:#94a3b8;font-size:12px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.controls button{background:#334155}.controls .primary{background:#2563eb}.note{font-size:12px;color:#94a3b8;margin-top:10px}@media(max-width:900px){.generator{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}}@media(max-width:520px){.seed-row,.generator{grid-template-columns:1fr}}
-</style>
+<meta name="description" content="ATAXX-VarBench research documentation, source snapshots, formal results and published game viewer.">
+<title>ATAXX-VarBench Research Portal</title>
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<div class="app">
-  <h1>ATAXX-VarBench Seed Viewer</h1>
-  <div class="muted">Seed Spec v3：同一 case + board + density 共用同一 world；Viewer 仍可回放既有 v2 pilot 資料。</div>
-
-  <section class="card">
-    <h2>輸入 Master Seed</h2>
-    <form id="seedForm" class="seed-row">
-      <input id="seedInput" inputmode="numeric" value="0" aria-label="Master Seed">
-      <button type="submit">載入已發布結果</button>
-    </form>
-    <div class="note">若 seed 尚未由正式 C++ engine 執行並發布，Viewer 不會在瀏覽器臨時重算。</div>
+<main id="app" class="page">
+  <section class="hero">
+    <div class="eyebrow">Volatility-Aware Adaptive Selective Search in Ataxx</div>
+    <h1>ATAXX-VarBench<br>研究閱讀入口</h1>
+    <p>把原本散落在 GitHub 檔案列表中的規格、正式結果與核心程式整理成唯讀靜態介面。正式計算仍只由 private C++ repository 執行；本網站不在瀏覽器重新產生研究 outcome。</p>
+    <div class="pill-row">
+      <span class="pill">Project Spec v1.0.0</span>
+      <span class="pill">Seed Spec v3</span>
+      <span class="pill">Primary board 7×7</span>
+      <span class="pill">Fixed-depth Alpha-Beta</span>
+      <span class="pill">V4-01 verified</span>
+    </div>
   </section>
 
-  <section class="card">
-    <h2>公式式 Seed 產生器</h2>
-    <div class="generator">
-      <div class="field"><label>棋盤大小</label><select id="boardSelect"></select></div>
-      <div class="field"><label>障礙比例</label><select id="densitySelect"></select></div>
-      <div class="field"><label>紅方方法</label><select id="redSelect"></select></div>
-      <div class="field"><label>藍方方法</label><select id="blueSelect"></select></div>
-      <div class="field"><label>Case ID</label><input id="caseInput" type="number" min="0" value="0"></div>
+  <section>
+    <h2 class="section-title">目前正式研究結果</h2>
+    <div class="kpi-grid">
+      <div class="kpi"><strong>59.0%</strong><span>PSV-20 vs P4 score rate</span></div>
+      <div class="kpi"><strong>21.0%</strong><span>PSV-20 vs P6 score rate</span></div>
+      <div class="kpi"><strong>13.37%</strong><span>PSV / P6 node cost</span></div>
+      <div class="kpi"><strong>67.87%</strong><span>triggered d6 changed d4 move</span></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-      <button id="generateBtn" type="button">公式產生 v3 Seed</button>
-      <button id="loadGeneratedBtn" class="secondary" type="button">產生並載入已發布結果</button>
-    </div>
-    <div class="seed-results" id="seedResults"></div>
-    <div class="note">v3 中 agent 組合只影響 Master Seed，不影響同 case 的 world layout。</div>
+    <div class="notice" style="margin-top:14px">V4-01 支持「Selective Deepening 比 fixed d4 強、且比 fixed d6 便宜很多」，但<strong>不支持</strong>「PSV-20 已接近 fixed d6 棋力」。</div>
   </section>
 
-  <div id="status" class="status"></div>
-  <div id="error" class="error"></div>
+  <section>
+    <h2 class="section-title">研究文件</h2>
+    <div id="docGrid" class="grid"><div class="loading">載入文件目錄…</div></div>
+    <p><a href="reader.html?id=spec">開啟完整文件閱讀器 →</a></p>
+  </section>
 
-  <div class="layout">
-    <div class="board-wrap"><div id="board"></div></div>
-    <aside class="panel">
-      <div id="matchup" class="matchup">尚未載入</div>
-      <div id="spec" class="spec"></div>
-      <div class="stat-grid">
-        <div class="stat"><span>回合</span><strong id="turn">0</strong></div>
-        <div class="stat"><span>進度</span><strong id="progress">0 / 0</strong></div>
-        <div class="stat"><span>紅方棋子</span><strong id="redScore">0</strong></div>
-        <div class="stat"><span>藍方棋子</span><strong id="blueScore">0</strong></div>
-      </div>
-      <div class="move-box"><div id="actor" class="muted">開局</div><strong id="move">Initial position</strong></div>
-      <div class="controls"><button id="prev">上一手</button><button id="play" class="primary">播放</button><button id="next">下一手</button></div>
-      <input id="timeline" type="range" min="0" max="0" value="0" step="1">
-      <div id="result" class="muted" style="margin-top:14px"></div>
-    </aside>
-  </div>
-</div>
-<script src="seed-spec.js"></script>
-<script>
-const $=id=>document.getElementById(id);
-const boardSelect=$('boardSelect'),densitySelect=$('densitySelect'),redSelect=$('redSelect'),blueSelect=$('blueSelect'),caseInput=$('caseInput'),seedInput=$('seedInput');
-let data=null,index=0,timer=null;
-function opt(select,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;select.appendChild(o)}
-AtaxxSeedSpec.BOARD_SIZES.forEach(x=>opt(boardSelect,x,`${x}×${x}`));
-AtaxxSeedSpec.DENSITIES.forEach(x=>opt(densitySelect,x,`${x}%`));
-AtaxxSeedSpec.AGENTS.forEach(x=>{opt(redSelect,x.id,x.label);opt(blueSelect,x.id,x.label)});
-function generatedSeed(){return AtaxxSeedSpec.encode({boardSize:Number(boardSelect.value),densityPercent:Number(densitySelect.value),redAgent:redSelect.value,blueAgent:blueSelect.value,caseId:BigInt(caseInput.value||0)})}
-function showGenerated(seed){const d=AtaxxSeedSpec.decode(seed);$('seedResults').innerHTML='';const b=document.createElement('button');b.className='seed-chip';b.textContent=String(seed);b.onclick=()=>loadSeed(seed);$('seedResults').appendChild(b);$('status').textContent=`Seed ${seed} = v${d.version}, ${d.boardSize}×${d.boardSize}, ${d.densityPercent}%, ${d.redAgent.label} vs ${d.blueAgent.label}, case ${d.caseId}`;return seed}
-function renderBoard(text,n){const el=$('board');el.replaceChildren();el.style.gridTemplateColumns=`repeat(${n},1fr)`;for(const v of text){const c=document.createElement('div');c.className=v==='#'?'cell blocked':'cell';if(v==='R'||v==='B'){const p=document.createElement('div');p.className=`piece ${v==='R'?'red':'blue'}`;c.appendChild(p)}el.appendChild(c)}}
-function render(){if(!data)return;const f=data.frames[index];renderBoard(f.board,data.board_size);$('turn').textContent=f.turn;$('progress').textContent=`${index} / ${data.frames.length-1}`;$('redScore').textContent=f.red;$('blueScore').textContent=f.blue;$('actor').textContent=f.player==='Start'?'開局':`${f.player} · ${f.agent}`;$('move').textContent=f.move;$('timeline').value=index;$('prev').disabled=index===0;$('next').disabled=index===data.frames.length-1}
-function stop(){if(timer!==null){clearInterval(timer);timer=null}$('play').textContent='播放'}
-function start(){if(!data)return;if(index>=data.frames.length-1)index=0;stop();timer=setInterval(()=>{if(index>=data.frames.length-1){stop();return}index++;render()},700);$('play').textContent='暫停'}
-async function loadSeed(seedValue){stop();$('error').textContent='';const seed=BigInt(seedValue);seedInput.value=String(seed);let decoded;try{decoded=AtaxxSeedSpec.decode(seed)}catch(e){$('error').textContent=e.message;return}$('status').textContent='正在讀取已發布資料…';try{const r=await fetch(`data/runs/${seed}.json`,{cache:'no-store'});if(!r.ok)throw new Error('NOT_PUBLISHED');const x=await r.json();if(String(x.seed)!==String(seed)||![2,3].includes(x.spec_version))throw new Error('INVALID_DATA');data=x;index=0;$('timeline').max=x.frames.length-1;$('matchup').textContent=`${x.red_agent.label}（紅） vs ${x.blue_agent.label}（藍）`;let spec=`Master Seed：<b>${x.seed}</b><br>Case ID：${x.case_id}<br>棋盤：${x.board_size}×${x.board_size}<br>障礙比例：${x.density_percent}%<br>Seed Spec：v${x.spec_version}`;if(x.world_key!==undefined)spec+=`<br>World Key：${x.world_key}`;$('spec').innerHTML=spec;$('result').textContent=`結果：${x.winner} · ${x.turns} 回合 · ${x.blocked} 個障礙 · ${x.total_search_nodes} search nodes · ${x.termination_reason||'natural'}`;$('status').textContent='已載入正式保存的模擬資料。';render();history.replaceState(null,'',`?seed=${seed}`)}catch(e){data=null;$('status').textContent='';$('error').textContent=e.message==='NOT_PUBLISHED'?`Seed ${seed} 尚未發布正式模擬資料。`:'資料格式錯誤或載入失敗。';$('matchup').textContent=`${decoded.redAgent.label} vs ${decoded.blueAgent.label}`;$('spec').textContent=`Seed ${seed} · v${decoded.version} · case ${decoded.caseId}`}}
-$('generateBtn').onclick=()=>showGenerated(generatedSeed());
-$('loadGeneratedBtn').onclick=()=>loadSeed(showGenerated(generatedSeed()));
-$('seedForm').onsubmit=e=>{e.preventDefault();if(/^\d+$/.test(seedInput.value.trim()))loadSeed(BigInt(seedInput.value.trim()));else $('error').textContent='Master Seed 必須是非負整數。'};
-$('prev').onclick=()=>{stop();if(index>0)index--;render()};$('next').onclick=()=>{stop();if(data&&index<data.frames.length-1)index++;render()};$('play').onclick=()=>timer===null?start():stop();$('timeline').oninput=()=>{stop();index=Number($('timeline').value);render()};
-const params=new URLSearchParams(location.search);if(params.has('seed')){seedInput.value=params.get('seed');loadSeed(BigInt(seedInput.value))}
-</script>
+  <section>
+    <h2 class="section-title">核心程式碼 snapshot</h2>
+    <div id="codeGrid" class="grid"><div class="loading">載入程式目錄…</div></div>
+    <p><a href="code.html?id=ataxx-cpp">開啟完整程式碼閱讀器 →</a></p>
+  </section>
+
+  <section>
+    <h2 class="section-title">工具</h2>
+    <div class="grid">
+      <a class="card card-link" href="viewer.html"><span class="pill">Read-only</span><h3>Seed / Game Viewer</h3><p>輸入或公式產生 Seed Spec v3 Master Seed，回放已由 private C++ engine 正式產生並發布的對局。</p></a>
+      <a class="card card-link" href="reader.html?id=v4-results"><span class="pill">Formal</span><h3>V4-01 正式結果</h3><p>200 場 paired color-swapped games 的棋力、成本、detector 行為與 interpretation boundary。</p></a>
+      <a class="card card-link" href="reader.html?id=audit"><span class="pill">Maintenance</span><h3>版本一致性 Audit</h3><p>查看 Seed Spec、CI、legacy workflow、search semantics 與 public/private version drift 的處理紀錄。</p></a>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">權威來源</h2>
+    <div class="card">
+      <p><strong>Private repository = computation / formal artifact authority.</strong></p>
+      <p>本 Pages 網站只保存經挑選的文件與 source snapshots，方便閱讀與展示。若公開 snapshot 與 private repo 後續版本不同，以 private repo 的 <code>SPEC.md</code>、task-specific frozen protocol、artifact SHA-256 與 validator 為準。</p>
+    </div>
+  </section>
+</main>
+<script src="assets/site.js"></script>
+<script>SITE.safeInit(SITE.initHome);</script>
 </body>
 </html>
