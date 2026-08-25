@@ -42,18 +42,34 @@ const index = read('index.html');
 for (const href of ['reader.html?id=spec', 'code.html?id=ataxx-cpp', 'viewer.html']) {
   assert.ok(index.includes(href), `index missing navigation link: ${href}`);
 }
+for (const label of ['研究閱讀入口', '目前正式研究結果', '核心程式碼快照', '種子／對局檢視器']) {
+  assert.ok(index.includes(label), `index missing Traditional Chinese UI label: ${label}`);
+}
 
 const reader = read('reader.html');
 assert.ok(reader.includes('assets/site.js'));
 assert.ok(reader.includes('SITE.initReader'));
+assert.ok(reader.includes('靜態文件快照'));
+assert.ok(reader.includes('切換文件'));
+
 const code = read('code.html');
 assert.ok(code.includes('SITE.initCode'));
+assert.ok(code.includes('唯讀程式碼快照'));
+assert.ok(code.includes('複製程式碼'));
+
 const viewer = read('viewer.html');
-assert.ok(viewer.includes('Seed Spec v3'));
+assert.ok(viewer.includes('種子規格 v3'));
+assert.ok(viewer.includes('對局檢視器'));
+assert.ok(viewer.includes('初始局面'));
 assert.ok(viewer.includes('seed-spec.js'));
+
+const siteJs = read('assets/site.js');
+for (const label of ['研究文件', '對局檢視器', '快照來源 commit', '核心程式碼快照']) {
+  assert.ok(siteJs.includes(label), `site.js missing Traditional Chinese UI label: ${label}`);
+}
 
 const readme = read('README.md');
 assert.ok(readme.includes('Current: Seed Spec v3'));
 assert.ok(readme.includes('read-only presentation layer'));
 
-console.log(`Static site validation PASS: ${catalog.items.length} catalog items from ${catalog.private_source_commit}`);
+console.log(`Static site validation PASS: Traditional Chinese UI, ${catalog.items.length} catalog items from ${catalog.private_source_commit}`);
