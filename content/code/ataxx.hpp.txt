@@ -1,0 +1,90 @@
+#pragma once
+
+#include <optional>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+enum class Cell {
+  Empty,
+  Red,
+  Blue,
+  Blocked
+};
+
+enum class Player {
+  Red,
+  Blue
+};
+
+enum class MoveType {
+  Clone,
+  Jump,
+  Pass
+};
+
+enum class StartLayout {
+  Standard,
+  Inset
+};
+
+struct Position {
+  int row = 0;
+  int col = 0;
+
+  bool operator==(const Position&) const = default;
+};
+
+struct Move {
+  MoveType type = MoveType::Pass;
+  std::optional<Position> from;
+  std::optional<Position> to;
+
+  static Move pass();
+  static Move normal(Position from, Position to, MoveType type);
+};
+
+struct VariantConfig {
+  int board_size = 7;
+  StartLayout start_layout = StartLayout::Standard;
+  std::vector<Position> blocked;
+};
+
+class Game {
+ public:
+  explicit Game(const VariantConfig& config = {});
+
+  int size() const;
+  Player current_player() const;
+  int move_count() const;
+  int consecutive_passes() const;
+
+  bool in_bounds(Position pos) const;
+  Cell at(Position pos) const;
+  std::vector<Move> legal_moves() const;
+  bool apply_move(const Move& move);
+
+  int count(Cell cell) const;
+  bool is_terminal() const;
+  bool is_repetition_draw() const;
+  std::optional<Player> winner() const;
+  std::pair<int, int> score() const;
+
+  void print() const;
+
+ private:
+  int size_ = 0;
+  std::vector<std::vector<Cell>> board_;
+  Player current_player_ = Player::Red;
+  int consecutive_passes_ = 0;
+  int move_count_ = 0;
+  bool repetition_draw_ = false;
+  std::unordered_set<std::string> seen_positions_;
+
+  Cell player_cell(Player player) const;
+  Cell opponent_cell(Player player) const;
+  void infect_around(Position destination);
+  std::string position_key() const;
+  void record_position();
+};
