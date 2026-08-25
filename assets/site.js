@@ -164,6 +164,7 @@ const SITE = (() => {
   function chrome(active) {
     const links = [
       ['home', 'index.html', '研究入口'],
+      ['results', 'results.html', '實驗結果'],
       ['docs', 'reader.html?id=spec', '研究文件'],
       ['code', 'code.html?id=ataxx-cpp', '程式碼'],
       ['viewer', 'viewer.html', '對局檢視器'],
@@ -184,6 +185,12 @@ const SITE = (() => {
     const codeGrid = document.querySelector('#codeGrid');
     docGrid.innerHTML = docs.slice(0, 6).map(item => `<a class="card card-link" href="reader.html?id=${encodeURIComponent(item.id)}"><span class="pill">${escapeHtml(item.group)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || '')}</p></a>`).join('');
     codeGrid.innerHTML = code.slice(0, 6).map(item => `<a class="card card-link" href="code.html?id=${encodeURIComponent(item.id)}"><span class="pill">${escapeHtml(item.group)}</span><h3>${escapeHtml(item.title)}</h3><p><code>${escapeHtml(item.source_path)}</code></p></a>`).join('');
+    document.body.insertAdjacentHTML('beforeend', footer(catalog.private_source_commit));
+  }
+
+  async function initResults() {
+    document.body.insertAdjacentHTML('afterbegin', chrome('results'));
+    const catalog = await loadCatalog();
     document.body.insertAdjacentHTML('beforeend', footer(catalog.private_source_commit));
   }
 
@@ -248,5 +255,5 @@ const SITE = (() => {
     }
   }
 
-  return {initHome, initReader, initCode, safeInit};
+  return {initHome, initResults, initReader, initCode, safeInit};
 })();
