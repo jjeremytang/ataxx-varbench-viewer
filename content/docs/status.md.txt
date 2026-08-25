@@ -1,0 +1,88 @@
+# Project Status
+
+> 此檔案是 ATAXX 專題目前進度的唯一正式來源（Single Source of Truth）。全域語義／版本規格請看 `SPEC.md`；README、PROJECT.md 與 logs 不重複維護 Current Task。
+
+## Current Phase
+
+Repository Standardization
+
+## Current Task
+
+規格統一＋程式版本一致性稽核＋靜態閱讀介面改造
+
+## Status
+
+**IMPLEMENT — 已修改、未驗證。**
+
+## Completion Criteria
+
+- 建立唯一全域規格來源 `SPEC.md` 與 machine-readable `spec/project_spec.json`。
+- 所有主要 C++ executable / Python tool / GitHub workflow 有 current / frozen / legacy 分級與用途紀錄。
+- 移除 active workflow 中已完成的一次性 patch 與被取代的 V3 monolithic formal pipeline，保留 archive provenance。
+- CI 固定使用 Release configure，並驗證 spec/artifact SHA 與 Seed Spec regression vectors。
+- 修正已發現的文件版本漂移，例如 Seed Spec v2/v3 與 Iterative Deepening 實作狀態。
+- public Viewer 與 private C++ Seed Spec 以相同 known vectors 驗證。
+- public Pages 改成 read-only 靜態研究入口：友善文件閱讀頁、程式碼 snapshot viewer、對局 viewer；公開 snapshot 明確標記來源 commit，不取代 private repo authority。
+- private README / docs navigation 改為清楚連到規格、結果、程式角色與公開閱讀介面。
+- 完成後 private CI 與 Viewer Pages/validation 均通過。
+
+## Standardization Audit Findings
+
+已確認：
+
+1. Viewer 實作已是 Seed Spec v3，但 public README 仍描述 v2。
+2. `PROJECT.md` 曾把 Iterative Deepening 寫成目前 baseline；實際 V3/V4 formal `SearchEngine` 為 fixed-depth Alpha-Beta。
+3. V3 locked detector preprocessing / logistic coefficients 被手動複製到 V4 C++ runner，現值未發現不符，但未來有 silent drift 風險。
+4. V4-01 per-game summary schema 沒直接保存所有 protocol-level provenance；V4-01 已由 run manifest / derived analysis 補齊，因此不影響既有結論，但 future schema 應升版。
+5. `v4-01-patch-decision-logging.yml` 是已完成的一次性 workflow，不應繼續 active。
+6. 舊 monolithic V3 dataset workflow 與 authoritative parallel frozen-position pipeline 並存，可能誤導後續重跑。
+7. Seed Spec C++ / JS 雙實作缺少共同 fixed-vector regression。
+8. Generic Linux CI 原先未在 configure 時指定 `CMAKE_BUILD_TYPE=Release`；formal workflows 本身有指定 Release，因此不影響已完成 V4 timing。
+9. `RULES.md` 與目前 core `Game` semantics 未發現版本不一致。
+
+Audit record: `docs/standardization_audit_2026-08-25.md`  
+Code registry: `docs/code_registry.md`
+
+## Latest Verified Research
+
+- `V4-01` position-level selective deepening formal primary experiment：**已驗證完成**。
+  - formal results: `docs/v4_01_formal_results.md`
+  - raw-result commit: `629337722514da0fc478a8804018b3b79b77497e`
+  - 50 frozen openings / 200 formal games / 15,485 move rows validated。
+  - `PSV-20 vs P4`: 56W / 6D / 38L，score rate **59.0%**，95% paired bootstrap CI **51.0%–67.0%**。
+  - `PSV-20 vs P6`: 18W / 6D / 76L，score rate **21.0%**，95% paired bootstrap CI **13.5%–29.0%**。
+  - PSV / P4 cost: **6.40× nodes**。
+  - PSV / P6 cost: **13.37% nodes**。
+  - 376 / 554 triggered d6 calls changed the d4 best move: **67.87%**。
+- `V3-03` locked detector：`M1_logistic_C_0.01`；locked test ROC-AUC / PR-AUC = 0.7183 / 0.5301。
+- `V3-02` formal dataset：3000 unique positions；dataset SHA-256 `752ab3caa88aa5b71e58364ff974f35aed45818fd6057c192ab4f843b815e928`。
+
+## V4-01 Interpretation Boundary
+
+正式數據支持：
+
+> 在標準 7×7 Ataxx 與 detector 訓練範圍 ply 6–30 內，volatility-aware position-level selective deepening 可提升相較 fixed d4 的棋力，同時使用遠少於 fixed d6 的搜尋成本。
+
+正式數據不支持：PSV-20 已接近 fixed d6、20% 是最佳 budget、d6 是 perfect play、或 detector 可外推到其他 domain。
+
+## Latest Change
+
+Repository standardization 已開始：新增 `SPEC.md` / `spec/project_spec.json` / `docs/code_registry.md` / standardization audit / Seed Spec regression test / project-spec validator，並開始將 superseded workflows 移出 active GitHub Actions。此批變更尚須最終 CI 與 public Viewer 驗證後才可標記完成。
+
+## Next
+
+先完成並 VERIFY repository standardization 與 public static reading interface。完成後恢復研究主線：
+
+`V4-02 — Offline oracle replay / missed-instability analysis`。
+
+## Blocked
+
+None.
+
+## Status Vocabulary
+
+- **未完成**：尚未執行、正在執行或執行失敗。
+- **已修改、未驗證**：程式或設定已改，但未通過 build/test/validator。
+- **已驗證完成**：有實際測試或資料驗證證據。
+
+Last updated: 2026-08-25
