@@ -1,0 +1,29 @@
+#pragma once
+
+#include <cstdint>
+
+#include "ataxx.hpp"
+
+struct SearchResult {
+  Move best_move;
+  int score = 0;
+  int depth = 0;
+  std::uint64_t nodes = 0;
+};
+
+class SearchEngine {
+ public:
+  SearchResult search(const Game& game, int depth);
+
+ private:
+  std::uint64_t nodes_ = 0;
+
+  int alpha_beta(
+      const Game& game,
+      int depth,
+      int alpha,
+      int beta,
+      Player root_player);
+
+  int evaluate(const Game& game, Player root_player) const;
+};
