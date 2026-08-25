@@ -1,0 +1,163 @@
+#include "seed_spec.hpp"
+
+#include <stdexcept>
+
+using namespace std;
+
+namespace {
+
+constexpr uint64_t SALT_WORLD_V2 = 0x55A7A005C0FFEE05ULL;
+constexpr uint64_t SALT_RED_RNG = 0x66A7A006C0FFEE06ULL;
+constexpr uint64_t SALT_BLUE_RNG = 0x77A7A007C0FFEE07ULL;
+constexpr uint64_t SALT_WORLD_V3 = 0x35A7A003C0FFEE03ULL;
+
+const vector<int> kBoardSizes = {10, 12, 15};
+const vector<int> kDensities = {10, 15, 20, 25, 30};
+const vector<SeedAgentProfile> kAgents = {
+  {"random", SeedAgentType::Random, 0, "Random"},
+  {"greedy", SeedAgentType::Greedy, 0, "Greedy"},
+  {"ab2", SeedAgentType::AlphaBeta, 2, "Alpha-Beta (d=2)"},
+  {"ab3", SeedAgentType::AlphaBeta, 3, "Alpha-Beta (d=3)"},
+  {"ab4", SeedAgentType::AlphaBeta, 4, "Alpha-Beta (d=4)"}
+};
+
+template <class T>
+int find_index(const vector<T>& values, const T& target) {
+  for (int i = 0; i < static_cast<int>(values.size()); i++) {
+    if (values[i] == target) return i;
+  }
+  return -1;
+}
+
+int find_agent_index(const string& id) {
+  for (int i = 0; i < static_cast<int>(kAgents.size()); i++) {
+    if (kAgents[i].id == id) return i;
+  }
+  return -1;
+}
+
+uint64_t derive(uint64_t value, uint64_t salt) {
+  return SeedCodecV2::splitmix64(value ^ salt);
+}
+
+void validate_indexes(int board_index, int density_index, int red_index, int blue_index) {
+  if (board_index < 0 || density_index < 0 || red_index < 0 || blue_index < 0) {
+    throw invalid_argument("Seed request contains unsupported values.");
+  }
+}
+
+}  // namespace
+
+const vector<int>& SeedCodecV2::board_sizes() { return kBoardSizes; }
+const vector<int>& SeedCodecV2::densities() { return kDensities; }
+const vector<SeedAgentProfile>& SeedCodecV2::agents() { return kAgents; }
+
+uint64_t SeedCodecV2::splitmix64(uint64_t value) {
+  uint64_t z = value + 0x9E3779B97F4A7C15ULL;
+  z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+  z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+  return z ^ (z >> 31);
+}
+
+uint64_t SeedCodecV2::encode(const SeedRequestV2& request) {
+  if (request.case_id > kMaxCaseId) {
+    throw invalid_argument("case_id exceeds Seed Spec v2 range.");
+  }
+
+  int board_index = find_index(kBoardSizes, request.board_size);
+  int density_index = find_index(kDensities, request.density_percent);
+  int red_index = find_agent_index(request.red_agent_id);
+  int blue_index = find_agent_index(request.blue_agent_id);
+  validate_indexes(board_index, density_index, red_index, blue_index);
+
+  return (request.case_id << 11)
+      | static_cast<uint64_t>(board_index)
+      | (static_cast<uint64_t>(density_index) << 2)
+      | (static_cast<uint64_t>(red_index) << 5)
+      | (static_cast<uint64_t>(blue_index) << 8);
+}
+
+SeedSpecV2 SeedCodecV2::decode(uint64_t seed) {
+  int board_index = static_cast<int>(seed & 0x3ULL) % static_cast<int>(kBoardSizes.size());
+  int density_index = static_cast<int>((seed >> 2) & 0x7ULL) % static_cast<int>(kDensities.size());
+  int red_index = static_cast<int>((seed >> 5) & 0x7ULL) % static_cast<int>(kAgents.size());
+  int blue_index = static_cast<int>((seed >> 8) & 0x7ULL) % static_cast<int>(kAgents.size());
+
+  SeedSpecV2 result;
+  result.seed = seed;
+  result.case_id = seed >> 11;
+  result.board_size = kBoardSizes[board_index];
+  result.density_percent = kDensities[density_index];
+  result.red_agent = kAgents[red_index];
+  result.blue_agent = kAgents[blue_index];
+  result.level_seed = derive(seed, SALT_WORLD_V2);
+  result.red_rng_seed = derive(seed, SALT_RED_RNG);
+  result.blue_rng_seed = derive(seed, SALT_BLUE_RNG);
+  return result;
+}
+
+const vector<int>& SeedCodecV3::board_sizes() { return kBoardSizes; }
+const vector<int>& SeedCodecV3::densities() { return kDensities; }
+const vector<SeedAgentProfile>& SeedCodecV3::agents() { return kAgents; }
+
+uint64_t SeedCodecV3::splitmix64(uint64_t value) {
+  return SeedCodecV2::splitmix64(value);
+}
+
+bool SeedCodecV3::is_v3(uint64_t seed) {
+  return (seed & kVersionBit) != 0;
+}
+
+uint64_t SeedCodecV3::encode(const SeedRequestV3& request) {
+  if (request.case_id > kMaxCaseId) {
+    throw invalid_argument("case_id exceeds Seed Spec v3 range.");
+  }
+
+  int board_index = find_index(kBoardSizes, request.board_size);
+  int density_index = find_index(kDensities, request.density_percent);
+  int red_index = find_agent_index(request.red_agent_id);
+  int blue_index = find_agent_index(request.blue_agent_id);
+  validate_indexes(board_index, density_index, red_index, blue_index);
+
+  uint64_t payload = (request.case_id << 11)
+      | static_cast<uint64_t>(board_index)
+      | (static_cast<uint64_t>(density_index) << 2)
+      | (static_cast<uint64_t>(red_index) << 5)
+      | (static_cast<uint64_t>(blue_index) << 8);
+  return kVersionBit | payload;
+}
+
+SeedSpecV3 SeedCodecV3::decode(uint64_t seed) {
+  if (!is_v3(seed)) {
+    throw invalid_argument("Seed is not Seed Spec v3.");
+  }
+
+  uint64_t payload = seed & ~kVersionBit;
+  int board_index = static_cast<int>(payload & 0x3ULL);
+  int density_index = static_cast<int>((payload >> 2) & 0x7ULL);
+  int red_index = static_cast<int>((payload >> 5) & 0x7ULL);
+  int blue_index = static_cast<int>((payload >> 8) & 0x7ULL);
+
+  if (board_index >= static_cast<int>(kBoardSizes.size())
+      || density_index >= static_cast<int>(kDensities.size())
+      || red_index >= static_cast<int>(kAgents.size())
+      || blue_index >= static_cast<int>(kAgents.size())) {
+    throw invalid_argument("Seed Spec v3 contains invalid encoded indexes.");
+  }
+
+  SeedSpecV3 result;
+  result.seed = seed;
+  result.case_id = payload >> 11;
+  result.board_size = kBoardSizes[board_index];
+  result.density_percent = kDensities[density_index];
+  result.red_agent = kAgents[red_index];
+  result.blue_agent = kAgents[blue_index];
+
+  result.world_key = (result.case_id << 5)
+      | static_cast<uint64_t>(board_index)
+      | (static_cast<uint64_t>(density_index) << 2);
+  result.level_seed = derive(result.world_key, SALT_WORLD_V3);
+  result.red_rng_seed = derive(seed, SALT_RED_RNG);
+  result.blue_rng_seed = derive(seed, SALT_BLUE_RNG);
+  return result;
+}
