@@ -1,0 +1,151 @@
+# Repository Standardization Audit — 2026-08-25
+
+## Scope
+
+本次 audit 在 `V4-01` 正式 200 場完成後進行。目的不是重做 V3/V4，而是避免之後因文件、程式、Viewer、workflow 各自演進而出現版本漂移。
+
+Audit 範圍：
+
+- core Ataxx rule/search implementation；
+- V3/V4 research runners；
+- CMake / tests / GitHub Actions；
+- Seed Spec C++ / JavaScript；
+- project documentation；
+- public `ataxx-varbench-viewer` Pages architecture。
+
+## Findings
+
+### A1 — Public Viewer README still described Seed Spec v2
+
+**Severity:** documentation/version mismatch  
+**Affects completed experiments:** no
+
+Actual implementation:
+
+- private C++ new generation uses `SeedCodecV3`;
+- public `seed-spec.js` declares `SPEC_VERSION = 3`;
+- public Viewer UI already describes v3 and supports v2 historical decode.
+
+The public README was therefore stale. Standard is now: **v3 for new generation; v2 decode/replay compatibility only**.
+
+### A2 — `PROJECT.md` overstated Iterative Deepening implementation
+
+**Severity:** research-method description mismatch  
+**Affects completed V3/V4:** no
+
+Current `SearchEngine` is fixed-depth Alpha-Beta. V3/V4 formal searches use independent d2/d4/d6 calls. Iterative Deepening is not a current formal baseline and must be described as a future/optional extension unless separately implemented and verified.
+
+### A3 — Locked detector formula is duplicated in online C++
+
+**Severity:** future semantic drift risk  
+**Affects V4-01:** no detected mismatch
+
+`src/v4_policy_runner.cpp` embeds the locked V3-03 preprocessing means/scales and logistic coefficients. Current inspected constants match the frozen selected model artifact, but duplication creates a maintenance hazard.
+
+Action:
+
+- retain V4-01 runner as `experiment-frozen`;
+- add project-spec/provenance validation;
+- before any future refactor, add/retain direct Python↔C++ score parity tests and create a new runner/schema version rather than editing V4-01 provenance in place.
+
+### A4 — V4-01 per-game summary schema omitted some protocol-level metadata
+
+**Severity:** schema completeness issue  
+**Affects V4-01 conclusion:** no
+
+Old V4-01 game summaries do not directly contain every run-level field, such as threshold artifact SHA and all-PSV-move deepen fraction. These are recoverable and were validated/recorded at the run-manifest and derived-analysis levels.
+
+Action:
+
+- do not rewrite frozen V4-01 raw summaries;
+- future policy runner output must carry an explicit schema version and complete run-level provenance.
+
+### A5 — One-time V4 logging patch remained an active workflow
+
+**Severity:** maintenance / accidental trigger risk  
+**Affects results:** no
+
+`v4-01-patch-decision-logging.yml` was a one-time source patcher and has already served its purpose. It should not remain executable under `.github/workflows/`.
+
+Action: archive it under `archive/workflows/` and remove the trigger request from active `.github/` space while preserving history in Git.
+
+### A6 — Two V3 formal dataset workflows looked equally current
+
+**Severity:** provenance ambiguity  
+**Affects authoritative dataset:** no
+
+The authoritative formal dataset used by V3-03/V4 is the parallel frozen-position + shard pipeline:
+
+`data/search/v3_02_formal_7x7_d4_d6_seed_20260824_parallel/`
+
+The older monolithic collector is superseded. Keeping both under active workflow names creates a risk that a future researcher reruns the wrong path.
+
+Action: archive the monolithic workflow and classify `src/volatility_data.cpp` as `legacy-pilot`; retain the authoritative parallel sampler/shard sources as `experiment-frozen`.
+
+### A7 — Seed Spec had two implementations without shared regression vectors
+
+**Severity:** cross-language drift risk  
+**Affects current published runs:** no detected mismatch
+
+C++ and JavaScript implementations currently agree by inspection. Standardization adds fixed known v3 vectors to `spec/project_spec.json`; C++ and Viewer tests must assert the same vectors.
+
+### A8 — Linux CI configure step did not explicitly set Release
+
+**Severity:** engineering consistency  
+**Affects formal V4 timing:** no
+
+Formal workflows correctly configure `-DCMAKE_BUILD_TYPE=Release`. Generic CI did not. On a single-config Linux generator, `cmake --build --config Release` does not by itself choose Release optimization.
+
+Action: configure CI with `-DCMAKE_BUILD_TYPE=Release`.
+
+### A9 — No single global spec authority existed
+
+**Severity:** systemic maintenance risk
+
+Before this audit, rules, research scope, status, protocols and README text partially overlapped. This makes future disagreements hard to resolve.
+
+Action:
+
+- `SPEC.md` becomes current global specification;
+- frozen protocols remain authoritative for their completed experiment;
+- `spec/project_spec.json` mirrors machine-checkable constants;
+- `PROJECT_STATUS.md` remains the sole current-task source;
+- README is navigation, not a second spec.
+
+## Verified consistent areas
+
+The audit did **not** find a mismatch between current `RULES.md` and core `Game` semantics for:
+
+- Standard starting locations;
+- Clone / Jump Chebyshev distances;
+- infection radius;
+- forced pass;
+- zero-piece / full-board / two-pass terminal conditions;
+- repetition key including board + side to move + consecutive passes;
+- repetition result as draw.
+
+The current Seed Spec v3 bit layout and supported board/density/agent sets also match between inspected C++ and JavaScript implementations.
+
+## Frozen-data policy
+
+This standardization intentionally does **not** edit:
+
+- frozen V3 dataset rows;
+- V3 model-selection outcomes;
+- V4 threshold artifacts;
+- V4 frozen opening set;
+- V4-01 200-game raw outcomes.
+
+Presentation/provenance can be supplemented with new derived files, but historical raw artifacts must remain reproducible from their original commits.
+
+## Resulting standard
+
+New formal work must start from:
+
+1. `SPEC.md`;
+2. `spec/project_spec.json`;
+3. `docs/code_registry.md`;
+4. the task-specific frozen/new protocol;
+5. a passing `tools/validate_project_spec.py` + C++ regression suite.
+
+Public Pages is a **read-only presentation mirror**, not a second simulation authority.
