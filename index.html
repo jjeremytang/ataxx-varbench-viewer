@@ -3,34 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ATAXX-VarBench research documentation, source snapshots, formal results and published game viewer.">
-<title>ATAXX-VarBench Research Portal</title>
+<meta name="description" content="ATAXX-VarBench 研究文件、程式碼快照、正式結果與已發布對局檢視器。">
+<title>ATAXX-VarBench 研究入口</title>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
 <main id="app" class="page">
   <section class="hero">
-    <div class="eyebrow">Volatility-Aware Adaptive Selective Search in Ataxx</div>
+    <div class="eyebrow">Ataxx 局面波動感知自適應選擇性搜尋</div>
     <h1>ATAXX-VarBench<br>研究閱讀入口</h1>
-    <p>把原本散落在 GitHub 檔案列表中的規格、正式結果與核心程式整理成唯讀靜態介面。正式計算仍只由 private C++ repository 執行；本網站不在瀏覽器重新產生研究 outcome。</p>
+    <p>把原本散落在 GitHub 檔案列表中的規格、正式結果與核心程式整理成唯讀靜態介面。正式計算仍只由 private C++ repository 執行；本網站不在瀏覽器重新產生研究結果。</p>
     <div class="pill-row">
-      <span class="pill">Project Spec v1.0.0</span>
-      <span class="pill">Seed Spec v3</span>
-      <span class="pill">Primary board 7×7</span>
-      <span class="pill">Fixed-depth Alpha-Beta</span>
-      <span class="pill">V4-01 verified</span>
+      <span class="pill">專案規格 v1.0.0</span>
+      <span class="pill">種子規格 v3</span>
+      <span class="pill">主要棋盤 7×7</span>
+      <span class="pill">固定深度 Alpha-Beta</span>
+      <span class="pill">V4-01 已驗證</span>
     </div>
   </section>
 
   <section>
     <h2 class="section-title">目前正式研究結果</h2>
     <div class="kpi-grid">
-      <div class="kpi"><strong>59.0%</strong><span>PSV-20 vs P4 score rate</span></div>
-      <div class="kpi"><strong>21.0%</strong><span>PSV-20 vs P6 score rate</span></div>
-      <div class="kpi"><strong>13.37%</strong><span>PSV / P6 node cost</span></div>
-      <div class="kpi"><strong>67.87%</strong><span>triggered d6 changed d4 move</span></div>
+      <div class="kpi"><strong>59.0%</strong><span>PSV-20 對 P4 得分率</span></div>
+      <div class="kpi"><strong>21.0%</strong><span>PSV-20 對 P6 得分率</span></div>
+      <div class="kpi"><strong>13.37%</strong><span>PSV 相對 P6 的節點成本</span></div>
+      <div class="kpi"><strong>67.87%</strong><span>觸發 d6 後改變 d4 走法的比例</span></div>
     </div>
-    <div class="notice" style="margin-top:14px">V4-01 支持「Selective Deepening 比 fixed d4 強、且比 fixed d6 便宜很多」，但<strong>不支持</strong>「PSV-20 已接近 fixed d6 棋力」。</div>
+    <div class="notice" style="margin-top:14px">V4-01 支持「選擇性加深比固定 d4 強、且比固定 d6 便宜很多」，但<strong>不支持</strong>「PSV-20 已接近固定 d6 棋力」。</div>
   </section>
 
   <section>
@@ -40,7 +40,7 @@
   </section>
 
   <section>
-    <h2 class="section-title">核心程式碼 snapshot</h2>
+    <h2 class="section-title">核心程式碼快照</h2>
     <div id="codeGrid" class="grid"><div class="loading">載入程式目錄…</div></div>
     <p><a href="code.html?id=ataxx-cpp">開啟完整程式碼閱讀器 →</a></p>
   </section>
@@ -48,17 +48,17 @@
   <section>
     <h2 class="section-title">工具</h2>
     <div class="grid">
-      <a class="card card-link" href="viewer.html"><span class="pill">Read-only</span><h3>Seed / Game Viewer</h3><p>輸入或公式產生 Seed Spec v3 Master Seed，回放已由 private C++ engine 正式產生並發布的對局。</p></a>
-      <a class="card card-link" href="reader.html?id=v4-results"><span class="pill">Formal</span><h3>V4-01 正式結果</h3><p>200 場 paired color-swapped games 的棋力、成本、detector 行為與 interpretation boundary。</p></a>
-      <a class="card card-link" href="reader.html?id=audit"><span class="pill">Maintenance</span><h3>版本一致性 Audit</h3><p>查看 Seed Spec、CI、legacy workflow、search semantics 與 public/private version drift 的處理紀錄。</p></a>
+      <a class="card card-link" href="viewer.html"><span class="pill">唯讀</span><h3>種子／對局檢視器</h3><p>輸入或依公式產生種子規格 v3 的 Master Seed，回放已由 private C++ engine 正式產生並發布的對局。</p></a>
+      <a class="card card-link" href="reader.html?id=v4-results"><span class="pill">正式實驗</span><h3>V4-01 正式結果</h3><p>200 場成對、交換顏色對局的棋力、成本、偵測器行為與結論適用範圍。</p></a>
+      <a class="card card-link" href="reader.html?id=audit"><span class="pill">維護</span><h3>版本一致性稽核</h3><p>查看種子規格、CI、舊版 workflow、搜尋語義與公開／私有版本漂移的處理紀錄。</p></a>
     </div>
   </section>
 
   <section>
     <h2 class="section-title">權威來源</h2>
     <div class="card">
-      <p><strong>Private repository = computation / formal artifact authority.</strong></p>
-      <p>本 Pages 網站只保存經挑選的文件與 source snapshots，方便閱讀與展示。若公開 snapshot 與 private repo 後續版本不同，以 private repo 的 <code>SPEC.md</code>、task-specific frozen protocol、artifact SHA-256 與 validator 為準。</p>
+      <p><strong>Private repository 是正式計算與研究 artifact 的權威來源。</strong></p>
+      <p>本 Pages 網站只保存經挑選的文件與程式碼快照，方便閱讀與展示。若公開快照與 private repo 後續版本不同，以 private repo 的 <code>SPEC.md</code>、該實驗凍結的 protocol、artifact SHA-256 與 validator 為準。</p>
     </div>
   </section>
 </main>
