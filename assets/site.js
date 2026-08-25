@@ -157,22 +157,22 @@ const SITE = (() => {
 
   async function loadCatalog() {
     const r = await fetch(catalogUrl, {cache: 'no-store'});
-    if (!r.ok) throw new Error(`catalog ${r.status}`);
+    if (!r.ok) throw new Error(`目錄載入失敗（${r.status}）`);
     return r.json();
   }
 
   function chrome(active) {
     const links = [
       ['home', 'index.html', '研究入口'],
-      ['docs', 'reader.html?id=spec', '文件'],
+      ['docs', 'reader.html?id=spec', '研究文件'],
       ['code', 'code.html?id=ataxx-cpp', '程式碼'],
-      ['viewer', 'viewer.html', '對局 Viewer'],
+      ['viewer', 'viewer.html', '對局檢視器'],
     ];
     return `<header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html">ATAXX-VarBench</a><nav class="nav">${links.map(([id, href, label]) => `<a href="${href}"${id === active ? ' style="font-weight:800;color:#15213a"' : ''}>${label}</a>`).join('')}</nav></div></header>`;
   }
 
   function footer(snapshot) {
-    return `<footer class="footer">Public Pages 是 read-only presentation snapshot。正式研究權威仍為 private C++ repository、frozen protocol 與驗證 artifacts。${snapshot ? ` Snapshot source commit: <code>${escapeHtml(snapshot)}</code>.` : ''}</footer>`;
+    return `<footer class="footer">本公開 Pages 是唯讀展示快照。正式研究權威仍為 private C++ repository、凍結的 protocol 與通過驗證的 artifacts。${snapshot ? ` 快照來源 commit：<code>${escapeHtml(snapshot)}</code>。` : ''}</footer>`;
   }
 
   async function initHome() {
@@ -192,14 +192,14 @@ const SITE = (() => {
     const catalog = await loadCatalog();
     const id = new URLSearchParams(location.search).get('id') || 'spec';
     const item = catalog.items.find(x => x.id === id && x.type === 'doc');
-    if (!item) throw new Error(`Unknown document: ${id}`);
+    if (!item) throw new Error(`找不到文件：${id}`);
     const r = await fetch(item.snapshot_path, {cache: 'no-store'});
-    if (!r.ok) throw new Error(`document ${r.status}`);
+    if (!r.ok) throw new Error(`文件載入失敗（${r.status}）`);
     const text = await r.text();
     const rendered = renderMarkdown(text);
     document.title = `${item.title} · ATAXX-VarBench`;
     document.querySelector('#docTitle').textContent = item.title;
-    document.querySelector('#docMeta').innerHTML = `<span class="pill">${escapeHtml(item.group)}</span><span>source: <code>${escapeHtml(item.source_path)}</code></span><span>snapshot: <code>${escapeHtml(item.source_commit || catalog.private_source_commit)}</code></span>`;
+    document.querySelector('#docMeta').innerHTML = `<span class="pill">${escapeHtml(item.group)}</span><span>來源：<code>${escapeHtml(item.source_path)}</code></span><span>快照：<code>${escapeHtml(item.source_commit || catalog.private_source_commit)}</code></span>`;
     document.querySelector('#article').innerHTML = rendered.html;
     document.querySelector('#toc').innerHTML = '<h3>本頁目錄</h3>' + rendered.headings.filter(x => x.depth <= 3).map(x => `<a class="depth-${x.depth}" href="#${x.id}">${escapeHtml(x.text)}</a>`).join('');
     const select = document.querySelector('#docSelect');
@@ -219,13 +219,13 @@ const SITE = (() => {
     const catalog = await loadCatalog();
     const id = new URLSearchParams(location.search).get('id') || 'ataxx-cpp';
     const item = catalog.items.find(x => x.id === id && x.type === 'code');
-    if (!item) throw new Error(`Unknown source file: ${id}`);
+    if (!item) throw new Error(`找不到程式碼檔案：${id}`);
     const r = await fetch(item.snapshot_path, {cache: 'no-store'});
-    if (!r.ok) throw new Error(`source ${r.status}`);
+    if (!r.ok) throw new Error(`程式碼載入失敗（${r.status}）`);
     const text = await r.text();
-    document.title = `${item.title} · Source · ATAXX-VarBench`;
+    document.title = `${item.title} · 程式碼 · ATAXX-VarBench`;
     document.querySelector('#codeTitle').textContent = item.title;
-    document.querySelector('#codeMeta').innerHTML = `<span class="pill">${escapeHtml(item.group)}</span><span><code>${escapeHtml(item.source_path)}</code></span><span>snapshot <code>${escapeHtml(item.source_commit || catalog.private_source_commit)}</code></span>`;
+    document.querySelector('#codeMeta').innerHTML = `<span class="pill">${escapeHtml(item.group)}</span><span><code>${escapeHtml(item.source_path)}</code></span><span>快照 <code>${escapeHtml(item.source_commit || catalog.private_source_commit)}</code></span>`;
     const tbody = document.querySelector('#codeBody');
     tbody.innerHTML = text.split('\n').map((line, i) => `<tr id="L${i + 1}"><td class="line-no"><a href="#L${i + 1}">${i + 1}</a></td><td class="line-code">${escapeHtml(line)}</td></tr>`).join('');
     document.querySelector('#copyCode').onclick = async () => {
@@ -235,7 +235,7 @@ const SITE = (() => {
       setTimeout(() => b.textContent = '複製程式碼', 1200);
     };
     const panel = document.querySelector('#filePanel');
-    panel.innerHTML = '<strong>核心程式 snapshot</strong>' + catalog.items.filter(x => x.type === 'code').map(x => `<a class="file-link${x.id === id ? ' active' : ''}" href="code.html?id=${encodeURIComponent(x.id)}">${escapeHtml(x.title)}</a>`).join('');
+    panel.innerHTML = '<strong>核心程式碼快照</strong>' + catalog.items.filter(x => x.type === 'code').map(x => `<a class="file-link${x.id === id ? ' active' : ''}" href="code.html?id=${encodeURIComponent(x.id)}">${escapeHtml(x.title)}</a>`).join('');
     document.body.insertAdjacentHTML('beforeend', footer(catalog.private_source_commit));
   }
 
