@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>程式碼 · ATAXX-VarBench</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main id="app" class="page">
+  <div style="display:flex;gap:14px;align-items:end;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px">
+    <div>
+      <div class="eyebrow">Read-only source snapshot</div>
+      <h1 id="codeTitle" style="margin:4px 0 6px">載入中…</h1>
+      <div id="codeMeta" class="meta"></div>
+    </div>
+    <button id="copyCode" class="btn">複製程式碼</button>
+  </div>
+  <div class="notice">此處只展示 private repository 的固定 snapshot，不會在瀏覽器重新執行研究引擎。正式語義與版本請以 private repo 的 <code>SPEC.md</code> 與 frozen artifacts 為準。</div>
+  <div class="code-layout" style="margin-top:18px">
+    <aside id="filePanel" class="file-panel"><div class="loading">載入檔案目錄…</div></aside>
+    <section class="code-panel">
+      <div class="code-head">行號可直接連結；source snapshot 保留原始縮排。</div>
+      <div class="code-wrap"><table class="code-table"><tbody id="codeBody"></tbody></table></div>
+    </section>
+  </div>
+</main>
+<script src="assets/site.js"></script>
+<script>SITE.safeInit(SITE.initCode);</script>
+</body>
+</html>
