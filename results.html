@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ATAXX-VarBench 從引擎驗證、Search Instability、exploratory volatility probe、正式 detector 到 position-level selective deepening 的完整實驗歷程與研究意義。">
+<meta name="description" content="ATAXX-VarBench 從引擎驗證、Search Instability、正式 volatility detector 到 position-level selective deepening 的完整實驗歷程，含 locked model 的數學定義、特徵、preprocessing 與係數。">
 <title>完整實驗歷程 · ATAXX-VarBench</title>
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/results.css">
@@ -11,27 +11,126 @@
 <body>
 <main id="app" class="page results-page">
   <section class="hero result-hero">
-    <div class="eyebrow">Complete Experiment History · 2026-08-20 → Present</div>
+    <div class="eyebrow">Complete Experiment History · Model Definition Included</div>
     <h1>從第一個搜尋驗證<br>一路到選擇性加深</h1>
-    <p>這一頁不是只展示最後一個漂亮結果，而是保留研究如何一步一步形成：先確認搜尋器可信，再確認 Search Instability 真的存在；接著用 exploratory probe 找候選訊號、建立無偏正式資料集、鎖定 detector，最後才把 detector 放進實際搜尋政策中測棋力與成本。</p>
+    <p>本頁保留完整研究鏈：先驗證搜尋器，再量測 Search Instability；接著探索 cheap signals、建立正式資料集、鎖定 volatility detector，最後把 detector 部署成 selective-deepening policy。模型本身的 target、24 維輸入、preprocessing、Logistic 公式、locked coefficients 與 threshold 也在本頁明確定義。</p>
     <div class="pill-row">
-      <span class="pill">工程驗證與科學實驗分開</span>
-      <span class="pill">Pilot / Exploratory / Formal 分級</span>
-      <span class="pill">所有正式結論保留限制</span>
+      <span class="pill">E0 → E1 → V2 → V3 → V4</span>
+      <span class="pill">Locked Logistic C=0.01</span>
+      <span class="pill">24-dimensional encoded input</span>
       <span class="pill">Current: V4-02 Planned</span>
     </div>
   </section>
 
   <section>
-    <h2 class="section-title">先看懂：這個專題到底在研究什麼？</h2>
+    <h2 class="section-title">研究主線</h2>
     <div class="research-flow">
-      <div class="flow-card"><span class="flow-step">1</span><h3>搜尋會不會不穩定？</h3><p>同一局面多搜幾層，best move 是否常被推翻？</p></div>
+      <div class="flow-card"><span class="flow-step">1</span><h3>Search Instability</h3><p>同一局面從淺搜變深搜，best move 是否常被推翻？</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-card"><span class="flow-step">2</span><h3>能不能提前辨認？</h3><p>只用便宜局面特徵與淺搜訊號，預測 d4→d6 是否改走法。</p></div>
+      <div class="flow-card"><span class="flow-step">2</span><h3>Volatility Detector</h3><p>只用 d6 開始前已知的資訊，預測 d4→d6 是否改走法。</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-card"><span class="flow-step">3</span><h3>能不能因此省搜尋？</h3><p>只在高波動局面加深，讓計算資源集中到更值得搜尋的位置。</p></div>
+      <div class="flow-card"><span class="flow-step">3</span><h3>Selective Deepening</h3><p>把深搜成本集中到模型判為高 volatility 的位置。</p></div>
     </div>
-    <div class="notice" style="margin-top:14px"><strong>核心概念：</strong>Volatility detector 不是替 Ataxx AI 直接選棋，而是在預測「再多花搜尋成本，是否可能改變目前決策」。因此研究本質是 <strong>adaptive computation allocation</strong>。</div>
+    <div class="notice" style="margin-top:14px"><strong>核心：</strong>Detector 不直接預測最佳走法，也不預測勝率；它預測的是「d4 的決策是否會被 d6 推翻」，因此角色是 <strong>adaptive computation allocator</strong>。</div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Locked Volatility Detector：模型本身的正式定義</h2>
+    <div class="meaning-grid">
+      <div class="meaning-card primary-meaning">
+        <div class="meaning-label">Target</div>
+        <h3>預測 d4 → d6 best-move disagreement</h3>
+        <p><code>y = 1 ⇔ best_move(d4) ≠ best_move(d6)</code>；完整 move identity 不同才算 positive。<code>y=0</code> 表示 d4 與 d6 選擇相同 best move。</p>
+      </div>
+      <div class="meaning-card">
+        <div class="meaning-label">Model family</div>
+        <h3>L2 Logistic Regression</h3>
+        <p>Locked model ID：<code>M1_logistic_C_0.01</code>，inverse regularization strength <code>C=0.01</code>。模型用 train 1800 rows fitting；family 與 C 由 validation PR-AUC 事前選定。</p>
+      </div>
+      <div class="meaning-card">
+        <div class="meaning-label">Data boundary</div>
+        <h3>只允許 d4 結束時已知資訊</h3>
+        <p>任何 <code>d6_*</code>、target label、split、position ID 或由 test labels 洩漏的資訊都禁止進入 predictor。</p>
+      </div>
+      <div class="meaning-card caution-card">
+        <div class="meaning-label">Interpretation boundary</div>
+        <h3>輸出不是「這步棋正確的機率」</h3>
+        <p>它是對 <code>P(d4 best move 在 d6 改變)</code> 的 Logistic model probability estimate。d6 本身仍不是 objective ground truth。</p>
+      </div>
+    </div>
+
+    <h3 class="section-title" style="font-size:19px">1. 24 維模型輸入 φ(x)</h3>
+    <div class="experiment-grid">
+      <div class="experiment-block"><h4>類別特徵 → 5 個 one-hot columns</h4><ul><li><code>phase_early</code>, <code>phase_mid</code>, <code>phase_late</code></li><li><code>player_Red</code>, <code>player_Blue</code></li></ul><p><code>target_ply</code> 與 <code>ply</code> 完全重複，因此 multivariate model 保留 <code>ply</code>、省略 <code>target_ply</code>。</p></div>
+      <div class="experiment-block"><h4>19 個 numeric / binary columns</h4><p><code>ply</code>, <code>own_pieces</code>, <code>opponent_pieces</code>, <code>piece_diff</code>, <code>empty_count</code>, <code>branching_factor</code>, <code>clone_move_count</code>, <code>jump_move_count</code>, <code>max_immediate_infection</code>, <code>mean_immediate_infection</code>, <code>d2_score</code>, <code>log1p_d2_nodes</code>, <code>d2_terminal_score</code>, <code>d4_score</code>, <code>log1p_d4_nodes</code>, <code>d4_terminal_score</code>, <code>move_changed_2_4</code>, <code>log1p_score_swing_2_4</code>, <code>log1p_node_growth_2_4</code>.</p></div>
+    </div>
+
+    <h3 class="section-title" style="font-size:19px">2. Preprocessing</h3>
+    <div class="experiment-grid">
+      <div class="experiment-block"><h4>Log transform</h4><p>四個非負且偏態的搜尋量先做 <code>log1p(u)=ln(1+u)</code>：<code>d2_nodes</code>、<code>d4_nodes</code>、<code>score_swing_2_4</code>、<code>node_growth_2_4</code>。</p></div>
+      <div class="experiment-block"><h4>Train-only standardization</h4><p>所有 numeric model columns 再用 train-set 固定參數標準化：<code>z=(u−μ_train)/σ_train</code>。Validation、test、以及後續 online deployment 都必須沿用同一組 μ、σ，不得重新估計。</p></div>
+    </div>
+
+    <details class="card" style="margin-top:14px">
+      <summary><strong>展開：train-set normalization 參數（μ / population σ）</strong></summary>
+      <div class="experiment-table-wrap" style="margin-top:12px">
+        <table class="experiment-table"><thead><tr><th>Model column</th><th>μ_train</th><th>σ_train</th></tr></thead><tbody>
+          <tr><td>ply</td><td>17.691111111111113</td><td>7.097427459524322</td></tr>
+          <tr><td>own_pieces</td><td>5.015</td><td>2.284804270732081</td></tr>
+          <tr><td>opponent_pieces</td><td>5.7427777777777775</td><td>2.456726153860403</td></tr>
+          <tr><td>piece_diff</td><td>-0.7277777777777777</td><td>3.326042953480165</td></tr>
+          <tr><td>empty_count</td><td>38.242222222222225</td><td>3.3836527855026</td></tr>
+          <tr><td>branching_factor</td><td>59.90833333333333</td><td>26.68786527202537</td></tr>
+          <tr><td>clone_move_count</td><td>22.34111111111111</td><td>9.537777454178311</td></tr>
+          <tr><td>jump_move_count</td><td>37.56722222222222</td><td>17.643347284318295</td></tr>
+          <tr><td>max_immediate_infection</td><td>2.6594444444444445</td><td>1.1662474114403676</td></tr>
+          <tr><td>mean_immediate_infection</td><td>0.5398846224425798</td><td>0.3574669218831217</td></tr>
+          <tr><td>d2_score</td><td>44443.98111111111</td><td>231476.18380503394</td></tr>
+          <tr><td>log1p_d2_nodes</td><td>5.58950834908694</td><td>0.45156387698364586</td></tr>
+          <tr><td>d2_terminal_score</td><td>0.05555555555555555</td><td>0.2290614236454256</td></tr>
+          <tr><td>d4_score</td><td>76110.61944444444</td><td>289228.5414337042</td></tr>
+          <tr><td>log1p_d4_nodes</td><td>9.38543465323788</td><td>0.6721087607057552</td></tr>
+          <tr><td>d4_terminal_score</td><td>0.08944444444444444</td><td>0.2853841898256964</td></tr>
+          <tr><td>move_changed_2_4</td><td>0.42055555555555557</td><td>0.49364823533252256</td></tr>
+          <tr><td>log1p_score_swing_2_4</td><td>0.928379360445101</td><td>2.4488738104828367</td></tr>
+          <tr><td>log1p_node_growth_2_4</td><td>3.8238848933016865</td><td>0.38497467887199593</td></tr>
+        </tbody></table>
+      </div>
+    </details>
+
+    <h3 class="section-title" style="font-size:19px">3. Logistic score 與 probability</h3>
+    <div class="card">
+      <p><code>η(x) = β₀ + Σⱼ βⱼ φⱼ(x)</code></p>
+      <p><code>p̂(x) = σ(η) = 1 / (1 + exp(−η))</code></p>
+      <p>其中 <code>φ(x)</code> 是上述 one-hot + train-standardized 24 維向量。<code>p̂</code> 越高，模型判定「d4 best move 會在 d6 被推翻」的風險越高。</p>
+    </div>
+
+    <h3 class="section-title" style="font-size:19px">4. Locked coefficients β</h3>
+    <div class="experiment-table-wrap">
+      <table class="experiment-table"><thead><tr><th>Term</th><th>Coefficient</th><th>Term</th><th>Coefficient</th></tr></thead><tbody>
+        <tr><td>intercept</td><td>-0.7259172222780259</td><td>phase_early</td><td>0.022459825965582807</td></tr>
+        <tr><td>phase_mid</td><td>-0.022186662142502176</td><td>phase_late</td><td>-0.0002708622779581649</td></tr>
+        <tr><td>player_Red</td><td>-0.07105187894784776</td><td>player_Blue</td><td>0.07105418049297021</td></tr>
+        <tr><td>ply</td><td>0.03247829571435345</td><td>own_pieces</td><td>-0.04178555393120888</td></tr>
+        <tr><td>opponent_pieces</td><td>-0.029367288033492228</td><td>piece_diff</td><td>-0.007012665748256354</td></tr>
+        <tr><td>empty_count</td><td>0.04953794236067458</td><td>branching_factor</td><td>0.04224592070632825</td></tr>
+        <tr><td>clone_move_count</td><td>0.006001384296844203</td><td>jump_move_count</td><td>0.06065819342648651</td></tr>
+        <tr><td>max_immediate_infection</td><td>-0.27077759225769427</td><td>mean_immediate_infection</td><td>0.12345526341729184</td></tr>
+        <tr><td>d2_score</td><td>0.0027792479690448633</td><td>log1p_d2_nodes</td><td>-0.012440505338616665</td></tr>
+        <tr><td>d2_terminal_score</td><td>-0.14602526131808413</td><td>d4_score</td><td>-0.11786547452618584</td></tr>
+        <tr><td>log1p_d4_nodes</td><td>0.0698154775010422</td><td>d4_terminal_score</td><td>-0.14614710230176234</td></tr>
+        <tr><td>move_changed_2_4</td><td>0.4374784599732508</td><td>log1p_score_swing_2_4</td><td>-0.04534105549826195</td></tr>
+        <tr><td>log1p_node_growth_2_4</td><td>0.13243980601401642</td><td></td><td></td></tr>
+      </tbody></table>
+    </div>
+    <div class="notice warning" style="margin-top:14px"><strong>係數怎麼讀：</strong>係數正負代表在其他 encoded features 固定時，對 Logistic log-odds 的正／負 association；它不是因果效果。因 numeric features 已標準化，所以數值尺度比直接用 raw units 更可比較，但 one-hot 與 standardized numeric 仍不應被簡化成單純「重要性排名」。</div>
+
+    <h3 class="section-title" style="font-size:19px">5. 從模型到 PSV-20 policy</h3>
+    <div class="comparison-grid">
+      <div class="comparison-card good"><h3>Detector</h3><div class="comparison-headline">算出 p̂(x)</div><p>模型只輸出 volatility probability estimate；本身不決定最後走 d4 還是 d6。</p></div>
+      <div class="comparison-card mixed"><h3>PSV-20 gate</h3><div class="comparison-headline">p̂(x) ≥ 0.500931073443522</div><p>在 policy 適用的 ply 6–30，若 score 達 fixed validation-derived threshold，就觸發 d6；否則保留 d4。Threshold 在正式 outcome 前已凍結。</p></div>
+    </div>
+    <p class="source-note">模型 authority：<code>results/v3_03_validation/selection.json</code>、<code>results/v3_03_test/model_parameters.csv</code>、<code>docs/v3_03_detector_analysis_protocol.md</code>。本頁數值依 locked artifacts 原值呈現。</p>
   </section>
 
   <section>
@@ -39,332 +138,105 @@
     <div class="history-summary">
       <div class="kpi"><strong>E0 / Engine</strong><span>規則、Alpha-Beta、logging、deterministic replay</span></div>
       <div class="kpi"><strong>E1 / Baseline</strong><span>1,000 個 7×7 positions，第一次量出 search instability</span></div>
-      <div class="kpi"><strong>V2 → V3</strong><span>exploratory probe → 無偏正式 dataset → locked detector</span></div>
+      <div class="kpi"><strong>V2 → V3</strong><span>exploratory features → formal dataset → locked detector</span></div>
       <div class="kpi"><strong>V4</strong><span>detector-guided position-level selective deepening</span></div>
     </div>
-    <div class="legend">
-      <span class="status-chip status-engineering">方法／工程驗證</span>
-      <span class="status-chip status-preliminary">Preliminary baseline</span>
-      <span class="status-chip status-exploratory">Exploratory</span>
-      <span class="status-chip status-formal">Formal</span>
-      <span class="status-chip status-locked">Locked / out-of-sample</span>
-      <span class="status-chip status-planned">Planned</span>
-    </div>
+    <div class="legend"><span class="status-chip status-engineering">方法／工程驗證</span><span class="status-chip status-preliminary">Preliminary</span><span class="status-chip status-exploratory">Exploratory</span><span class="status-chip status-formal">Formal</span><span class="status-chip status-locked">Locked</span><span class="status-chip status-planned">Planned</span></div>
   </section>
 
-  <div class="phase-divider"><span>Phase A · 先建立可信的實驗工具</span></div>
+  <div class="phase-divider"><span>Phase A · 實驗工具與搜尋器</span></div>
   <section class="timeline">
-    <article class="timeline-item engineering">
-      <div class="timeline-marker">E0</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-engineering">方法／工程驗證</span><div class="experiment-id">2026-08-20～22 · Engine & Search Validation</div><h3>Ataxx Engine、Alpha-Beta 與 Search Logging</h3></div>
-          <span class="experiment-date">研究起點</span>
-        </div>
-        <div class="question-box"><strong>為什麼先做這個？</strong><p>如果 legal move、infection、pass、terminal、search score 或 node count 有錯，後面所有 instability 與 detector 結論都沒有意義。</p></div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>做了什麼</h4><ul><li>完成 Ataxx 核心規則與一般 N×N 棋盤。</li><li>建立 fixed-depth Alpha-Beta、stable move ordering、search logging。</li><li>建立可重現 positions / seed 流程與測試。</li></ul></div>
-          <div class="experiment-block"><h4>結果</h4><p>程式與測試通過，能輸出 best move、score、depth、nodes；之後所有正式研究都以同一 authoritative C++ engine 為基礎。</p></div>
-        </div>
-        <div class="meaning-box"><strong>研究意義</strong><p>這不是用來證明科學假說的實驗，而是建立後續研究的 measurement instrument。它的成果是「我們有一個可重現、可驗證的搜尋器」。</p></div>
-        <div class="limitation-box"><strong>不能宣稱</strong><p>Alpha-Beta 驗證通過本身不代表 search instability 存在，也不代表 selective deepening 有效。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>固定一批局面，在不同 depth 上搜尋，直接量測 best move 是否改變。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item engineering"><div class="timeline-marker">E0</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-engineering">方法／工程驗證</span><div class="experiment-id">2026-08-20～22 · Engine & Search Validation</div><h3>Ataxx Engine、Alpha-Beta、Search Logging</h3></div><span class="experiment-date">研究起點</span></div><div class="question-box"><strong>目的</strong><p>確認 rules、legal moves、infection、terminal、best move、score 與 node count 都可測且可重現。</p></div><div class="experiment-grid"><div class="experiment-block"><h4>實作</h4><p>N×N Ataxx、fixed-depth Alpha-Beta、stable move ordering、search logging、tests。</p></div><div class="experiment-block"><h4>結果</h4><p>形成後續研究共用的 authoritative C++ measurement engine。</p></div></div><div class="limitation-box"><strong>邊界</strong><p>這是 instrument validation，不是 search-instability 科學結論。</p></div></div></article>
   </section>
 
-  <div class="phase-divider"><span>Phase B · 第一個核心現象：Search Instability</span></div>
+  <div class="phase-divider"><span>Phase B · Search Instability</span></div>
   <section class="timeline">
-    <article class="timeline-item">
-      <div class="timeline-marker">E1</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-preliminary">Preliminary baseline</span><div class="experiment-id">E1 · Search Instability — d2 / d4 / d6</div><h3>第一次正式量出：搜尋加深真的常改變 Ataxx 的最佳走法</h3></div>
-          <span class="experiment-date">2026-08-22</span>
-        </div>
-        <div class="question-box"><strong>Research question</strong><p>標準 7×7 Ataxx 中，best move 是否會隨搜尋深度增加而頻繁改變？而更深搜尋的成本又有多大？</p></div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>設計</h4><ul><li>標準 7×7、無障礙。</li><li>1,000 個固定 positions，sampling ply 6–30。</li><li>每局面搜尋 d2、d4、d6，共 3,000 search records。</li></ul></div>
-          <div class="experiment-block"><h4>主要指標</h4><ul><li>best-move flip rate</li><li>evaluation-score swing</li><li>node growth</li><li>依 early / mid / late 描述 instability</li></ul></div>
-        </div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>38.0%</strong><span>d2 → d4 best-move flip</span></div>
-          <div class="mini-metric"><strong>32.6%</strong><span>d4 → d6 best-move flip</span></div>
-          <div class="mini-metric"><strong>45.4%</strong><span>d2 → d6 best-move flip</span></div>
-          <div class="mini-metric"><strong>51.8%</strong><span>至少一次改變 best move</span></div>
-        </div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>178.5</strong><span>d2 median nodes</span></div>
-          <div class="mini-metric"><strong>6,888</strong><span>d4 median nodes</span></div>
-          <div class="mini-metric"><strong>226,438</strong><span>d6 median nodes</span></div>
-          <div class="mini-metric"><strong>≈1269×</strong><span>d6 / d2 median node cost</span></div>
-        </div>
-        <div class="meaning-box"><strong>研究意義</strong><p>這是主線成立的第一個關鍵證據：Ataxx 中更深搜尋不只是「算得更多」，而是經常真的改變 decision；但 d6 成本又遠高於 d2/d4。這同時建立了「值得加深」與「不能全部加深」兩個條件。</p></div>
-        <div class="limitation-box"><strong>限制</strong><p>21 個特別困難 positions 為完成 d6 使用較大的 transposition table，因此跨 position 的 node-cost 比較仍屬 preliminary；此外 d6 也不是 ground truth。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>不再問「有沒有 instability」，而改問「能不能用便宜訊號提前知道哪些局面會 instability」。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">E1</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-preliminary">Preliminary baseline</span><div class="experiment-id">E1 · d2 / d4 / d6</div><h3>搜尋加深經常改變最佳走法</h3></div><span class="experiment-date">2026-08-22</span></div><div class="question-box"><strong>Research question</strong><p>7×7 無障礙 Ataxx 的 best move 是否會隨 depth 改變？深搜成本多大？</p></div><div class="metrics-row"><div class="mini-metric"><strong>38.0%</strong><span>d2→d4 flip</span></div><div class="mini-metric"><strong>32.6%</strong><span>d4→d6 flip</span></div><div class="mini-metric"><strong>45.4%</strong><span>d2→d6 flip</span></div><div class="mini-metric"><strong>51.8%</strong><span>至少一次 flip</span></div></div><div class="metrics-row"><div class="mini-metric"><strong>178.5</strong><span>d2 median nodes</span></div><div class="mini-metric"><strong>6,888</strong><span>d4 median nodes</span></div><div class="mini-metric"><strong>226,438</strong><span>d6 median nodes</span></div><div class="mini-metric"><strong>≈1269×</strong><span>d6/d2 median cost</span></div></div><div class="meaning-box"><strong>意義</strong><p>Instability 足夠常見，而且全部深搜非常昂貴，因此形成「哪些位置值得加深」的研究問題。</p></div><div class="limitation-box"><strong>限制</strong><p>21 個 hard positions 使用較大 TT；node 跨位置比較屬 preliminary。d6 也不是 ground truth。</p></div></div></article>
   </section>
 
-  <div class="phase-divider"><span>Phase C · 可重現 paired baseline 與 Search Probe 工具</span></div>
+  <div class="phase-divider"><span>Phase C · Paired control 與 Probe</span></div>
   <section class="timeline">
-    <article class="timeline-item engineering">
-      <div class="timeline-marker">S</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-engineering">方法／工程驗證</span><div class="experiment-id">Seed Spec v3 · Paired-world validation</div><h3>同一 world 交換 agent assignment，建立公平對戰與可重現資料流程</h3></div>
-          <span class="experiment-date">2026-08-23</span>
-        </div>
-        <div class="question-box"><strong>目的</strong><p>後面要比較不同搜尋策略時，不能讓雙方看到不同棋盤或用不可追蹤 random state；因此 seed 必須能穩定重建相同 world，並支援 paired assignment。</p></div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>做了什麼</h4><ul><li>Seed Spec 升級至 v3。</li><li>pair A / pair B 共用同一 world，僅交換 agent assignment。</li><li>建立 C++ authoritative generation → persisted JSON → read-only Viewer。</li><li>建立 smoke validation 與 batch workflow。</li></ul></div>
-          <div class="experiment-block"><h4>研究用途</h4><p>之後正式對戰可做 color/agent swap paired comparison；同一 seed 可回放相同局面，形成完整 provenance。</p></div>
-        </div>
-        <div class="meaning-box"><strong>研究意義</strong><p>這一步解決的是 experimental control，而不是提出新棋力結論。它讓後面的勝負差異比較不會混入「不同 world」這個 confounder。</p></div>
-      </div>
-    </article>
-
-    <article class="timeline-item engineering">
-      <div class="timeline-marker">P</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-engineering">方法／工程驗證</span><div class="experiment-id">Search Probe v1 / v2</div><h3>把 instability 從一個標籤拆成可觀察的便宜訊號</h3></div>
-          <span class="experiment-date">2026-08-23～24</span>
-        </div>
-        <div class="question-box"><strong>目的</strong><p>要做 detector，必須先決定「在不知道 d6 的情況下」可以合法取得哪些 features。</p></div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>Probe v1</h4><p>在同一 position 記錄 d2 / d3 / d4 的 best move、score、nodes。</p></div>
-          <div class="experiment-block"><h4>Probe v2 新增</h4><ul><li>move_changed_2_4</li><li>score_swing_2_4</li><li>node_growth_2_4</li><li>branching_factor</li><li>其他盤面／感染相關特徵</li></ul></div>
-        </div>
-        <div class="meaning-box"><strong>研究意義</strong><p>將「局面看起來亂」轉成機器可以量測的 candidate signals，為下一個 exploratory analysis 提供資料欄位。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item engineering"><div class="timeline-marker">S</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-engineering">方法／工程驗證</span><div class="experiment-id">Seed Spec v3</div><h3>Paired-world deterministic validation</h3></div><span class="experiment-date">2026-08-23</span></div><div class="question-box"><strong>目的</strong><p>同一 world 交換 agent assignment，控制棋盤與 random state confounders。</p></div><div class="meaning-box"><strong>結果</strong><p>建立 C++ authoritative generation → persisted JSON → viewer 與 paired batch workflow。</p></div></div></article>
+    <article class="timeline-item engineering"><div class="timeline-marker">P</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-engineering">方法／工程驗證</span><div class="experiment-id">Search Probe v1 / v2</div><h3>建立 cheap volatility signals</h3></div><span class="experiment-date">2026-08-23～24</span></div><div class="experiment-grid"><div class="experiment-block"><h4>v1</h4><p>記錄 d2/d3/d4 best move、score、nodes。</p></div><div class="experiment-block"><h4>v2</h4><p>加入 move change、score swing、node growth、branching 與 infection features。</p></div></div></div></article>
   </section>
 
-  <div class="phase-divider"><span>Phase D · V2 Exploratory：先探索哪些訊號值得留下</span></div>
+  <div class="phase-divider"><span>Phase D · V2 Exploratory</span></div>
   <section class="timeline">
-    <article class="timeline-item exploratory">
-      <div class="timeline-marker">V2</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-exploratory">Exploratory case-control</span><div class="experiment-id">V2-02 / V2-03 · 10×10, obstacle density 20%</div><h3>在刻意挑出的複雜 worlds 上探索 volatility features</h3></div>
-          <span class="experiment-date">2026-08-24</span>
-        </div>
-        <div class="question-box"><strong>Research question</strong><p>淺層搜尋的 move disagreement、node growth、branching 等 cheap features，是否和更深層 move change 有描述性關聯？</p></div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>資料</h4><ul><li>10×10，20% 障礙。</li><li>16 worlds、32 games、3,802 positions。</li><li>special worlds vs control。</li><li>研究型態：exploratory_case_control。</li></ul></div>
-          <div class="experiment-block"><h4>為什麼不是正式 population study？</h4><p>special worlds 是依之前 outcome patterns 挑選，因此 sampling 有意偏向特定案例；這個階段只拿來找「哪些 features 值得帶進下一版」。</p></div>
-        </div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>46.90%</strong><span>all d2→d3 move change</span></div>
-          <div class="mini-metric"><strong>45.11%</strong><span>all d3→d4 move change</span></div>
-          <div class="mini-metric"><strong>46.16%</strong><span>all d2→d4 move change</span></div>
-          <div class="mini-metric"><strong>0.6022</strong><span>node_growth_2_4 rank AUC</span></div>
-        </div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>單一 feature 訊號</h4><ul><li>node_growth_2_4: AUC 0.6022</li><li>branching_factor: AUC 0.5730</li><li>score_swing_2_4: AUC 0.5465</li></ul></div>
-          <div class="experiment-block"><h4>觀察</h4><p>單一 feature 都只有弱到中弱的 discrimination，顯示「一條人工 threshold」很可能不足，需要多變量模型。</p></div>
-        </div>
-        <div class="meaning-box"><strong>研究意義</strong><p>V2 沒有證明某種 topology 一定更 volatile；它真正完成的任務是：確認 cheap features 裡有一些 signal，但單一 feature 不夠強，因此值得進一步建立無偏 7×7 dataset 並做 multivariate detector。</p></div>
-        <div class="limitation-box"><strong>不能宣稱</strong><p>不能用這組 46% 左右的 flip rate 當成一般 Ataxx population prevalence；也不能從 special/control 差異推論障礙 topology 的因果效果。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>回到主研究設定：標準 7×7、無障礙、固定 sampling protocol，建立可以真正 train / validation / test 的正式 dataset。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item exploratory"><div class="timeline-marker">V2</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-exploratory">Exploratory case-control</span><div class="experiment-id">V2-02 / V2-03 · 10×10 · 20% obstacles</div><h3>探索哪些 cheap features 值得進入正式模型</h3></div><span class="experiment-date">2026-08-24</span></div><div class="experiment-grid"><div class="experiment-block"><h4>資料</h4><p>16 worlds、32 games、3,802 positions；special vs control。</p></div><div class="experiment-block"><h4>主要 feature association</h4><p>node_growth AUC 0.6022；branching 0.5730；score_swing 0.5465。</p></div></div><div class="metrics-row"><div class="mini-metric"><strong>46.90%</strong><span>d2→d3 change</span></div><div class="mini-metric"><strong>45.11%</strong><span>d3→d4 change</span></div><div class="mini-metric"><strong>46.16%</strong><span>d2→d4 change</span></div><div class="mini-metric"><strong>0.6022</strong><span>best listed single AUC</span></div></div><div class="meaning-box"><strong>意義</strong><p>單一 signal 不夠強，支持改用 multivariate detector。</p></div><div class="limitation-box"><strong>不能宣稱</strong><p>special worlds 是依 prior outcomes 選取，因此不能用 46% 當一般 Ataxx prevalence，也不能推論 topology 因果效果。</p></div></div></article>
   </section>
 
-  <div class="phase-divider"><span>Phase E · V3 Formal：建立無偏資料集與 Locked Detector</span></div>
+  <div class="phase-divider"><span>Phase E · V3 Formal Dataset & Locked Detector</span></div>
   <section class="timeline">
-    <article class="timeline-item">
-      <div class="timeline-marker">3.1</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-formal">Formal protocol</span><div class="experiment-id">V3-01 · Formal Volatility Dataset Protocol</div><h3>先凍結資料規格，再跑正式資料</h3></div>
-          <span class="experiment-date">2026-08-24</span>
-        </div>
-        <div class="question-box"><strong>目的</strong><p>把 V2 的探索與 V3 的正式驗證隔離，避免看過結果後再改 sampling、feature leakage 或 split 規則。</p></div>
-        <div class="experiment-grid"><div class="experiment-block"><h4>主要規則</h4><ul><li>標準 7×7、0 obstacles。</li><li>deterministic position sampler。</li><li>target label = d4→d6 best-move change。</li><li>predictor 不能使用 d6 才知道的資訊。</li></ul></div><div class="experiment-block"><h4>驗證機制</h4><p>建立 dataset validator、smoke workflow、parallel shard runner 與 merge validator，正式資料需 provenance 與 SHA-256。</p></div></div>
-        <div class="meaning-box"><strong>研究意義</strong><p>這是防止 data leakage 與 researcher degrees of freedom 的設計階段；沒有產生新 effect size，但提高後續 V3-02 / V3-03 結論可信度。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">3.1</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-formal">Formal protocol</span><div class="experiment-id">V3-01</div><h3>先凍結 sampling、label、predictor boundary 與 split</h3></div><span class="experiment-date">2026-08-24</span></div><div class="meaning-box"><strong>意義</strong><p>隔離 V2 exploration 與 V3 confirmation，避免 leakage 與看結果後改規則。</p></div></div></article>
 
-    <article class="timeline-item">
-      <div class="timeline-marker">3.2</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-formal">Formal dataset · Validated</span><div class="experiment-id">V3-02 · Formal 7×7 Volatility Dataset</div><h3>3,000 個 unique states：正式量測 d4→d6 instability</h3></div>
-          <span class="experiment-date">2026-08-24</span>
-        </div>
-        <div class="question-box"><strong>Research question</strong><p>在固定、無偏且可重現的標準 7×7 sampling protocol 下，d4→d6 best-move change rate 有多少？資料是否能支持正式 detector 訓練？</p></div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>3,000</strong><span>unique states</span></div>
-          <div class="mini-metric"><strong>34.63%</strong><span>d4→d6 changed overall</span></div>
-          <div class="mini-metric"><strong>1,039</strong><span>changed states</span></div>
-          <div class="mini-metric"><strong>1,961</strong><span>stable states</span></div>
-        </div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>34.2%</strong><span>early phase</span></div>
-          <div class="mini-metric"><strong>34.1%</strong><span>mid phase</span></div>
-          <div class="mini-metric"><strong>35.6%</strong><span>late phase</span></div>
-          <div class="mini-metric"><strong>1800 / 600 / 600</strong><span>train / validation / test</span></div>
-        </div>
-        <div class="meaning-box"><strong>研究意義</strong><p>Search instability 在正式 7×7 dataset 中仍約占三分之一，而且 early / mid / late 都存在，表示 E1 現象並沒有因更嚴格 sampling 而消失；同時 class balance 足以進行 detector 訓練與 out-of-sample test。</p></div>
-        <div class="limitation-box"><strong>限制</strong><p>label 是「d4 與 d6 是否選不同 move」，不是「d4 錯、d6 對」；因此 detector 預測的是 search instability，而非 objective move correctness。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>只用 train + validation 選 detector；test split 保持封存直到 model selection 鎖定。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">3.2</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-formal">Formal dataset · Validated</span><div class="experiment-id">V3-02</div><h3>3,000 unique 7×7 states 正式量測 instability</h3></div><span class="experiment-date">2026-08-24</span></div><div class="metrics-row"><div class="mini-metric"><strong>3,000</strong><span>unique states</span></div><div class="mini-metric"><strong>34.63%</strong><span>d4→d6 positive</span></div><div class="mini-metric"><strong>1,039</strong><span>changed</span></div><div class="mini-metric"><strong>1,961</strong><span>stable</span></div></div><div class="metrics-row"><div class="mini-metric"><strong>34.2%</strong><span>early</span></div><div class="mini-metric"><strong>34.1%</strong><span>mid</span></div><div class="mini-metric"><strong>35.6%</strong><span>late</span></div><div class="mini-metric"><strong>1800/600/600</strong><span>train/val/test</span></div></div><div class="meaning-box"><strong>意義</strong><p>E1 的現象在正式 sampling 下仍約占三分之一，足以進入 detector study。</p></div></div></article>
 
-    <article class="timeline-item">
-      <div class="timeline-marker">3.3a</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-formal">Validation selection</span><div class="experiment-id">V3-03A · Feature / Model Selection</div><h3>單一 feature 不夠：Logistic Regression 成為 locked detector</h3></div>
-          <span class="experiment-date">2026-08-24</span>
-        </div>
-        <div class="question-box"><strong>Research question</strong><p>哪些 cheap features 有 predictive signal？多變量模型能否比單一 feature 更有效辨認未來 d4→d6 flip？</p></div>
-        <div class="experiment-grid">
-          <div class="experiment-block"><h4>Validation 上最強單一 feature</h4><ul><li>move_changed_2_4: ROC-AUC 0.6529</li><li>d4_score: 0.6202</li><li>d4_nodes: 0.5925</li><li>node_growth_2_4: 0.5922</li></ul></div>
-          <div class="experiment-block"><h4>候選模型</h4><p>比較多個 Logistic Regression regularization 與 shallow Decision Tree；majority baseline ROC-AUC = 0.5。</p></div>
-        </div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>0.7218</strong><span>selected validation ROC-AUC</span></div>
-          <div class="mini-metric"><strong>0.5308</strong><span>selected validation PR-AUC</span></div>
-          <div class="mini-metric"><strong>C = 0.01</strong><span>locked logistic configuration</span></div>
-          <div class="mini-metric"><strong>M1</strong><span>locked model family</span></div>
-        </div>
-        <div class="experiment-grid"><div class="experiment-block"><h4>20% validation deepen budget</h4><p>flip recall 34.11%、precision 60.83%、recall lift 1.71×；policy node proxy 約 fixed d6 的 31.65%。</p></div><div class="experiment-block"><h4>為什麼選 Logistic</h4><p>Validation performance 優於 tree candidates，且模型簡單、可解釋、容易嵌入 C++ online policy。</p></div></div>
-        <div class="meaning-box"><strong>研究意義</strong><p>局面／淺搜資訊中存在可組合的 predictive signal；多變量模型比任何單一 heuristic 更好。這一步才真正把「volatility」從概念變成可計算 detector score。</p></div>
-        <div class="limitation-box"><strong>重要方法邊界</strong><p>這些結果仍是 validation；在看到 test 前，model family、C、preprocessing 與 feature set 必須鎖定。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>使用已鎖定 selection.json 對完全未參與 model selection 的 600-row test split 做一次性評估。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">3.3a</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-formal">Validation selection</span><div class="experiment-id">V3-03A</div><h3>選出 locked L2 Logistic detector</h3></div><span class="experiment-date">2026-08-24</span></div><div class="metrics-row"><div class="mini-metric"><strong>0.7218</strong><span>validation ROC-AUC</span></div><div class="mini-metric"><strong>0.5308</strong><span>validation PR-AUC</span></div><div class="mini-metric"><strong>C=0.01</strong><span>selected regularization</span></div><div class="mini-metric"><strong>34.11%</strong><span>flip recall @20%</span></div></div><div class="experiment-grid"><div class="experiment-block"><h4>最強單一 feature</h4><p><code>move_changed_2_4</code> validation ROC-AUC 0.6529。</p></div><div class="experiment-block"><h4>選模規則</h4><p>Validation primary metric = PR-AUC；0.005 內偏好較簡單／較強 regularization。</p></div></div><div class="next-box"><strong>下一步</strong><p>selection.json 先鎖定，再碰 test。</p></div></div></article>
 
-    <article class="timeline-item">
-      <div class="timeline-marker">3.3b</div>
-      <div class="timeline-card">
-        <div class="timeline-head">
-          <div><span class="status-chip status-locked">Locked out-of-sample test</span><div class="experiment-id">V3-03B · Locked Test</div><h3>Detector 的 predictive signal 在 unseen test 上保留下來</h3></div>
-          <span class="experiment-date">2026-08-24～25</span>
-        </div>
-        <div class="question-box"><strong>Research question</strong><p>預先鎖定的 detector 在沒有參與選模的 test positions 上，是否仍能辨認 d4→d6 instability？</p></div>
-        <div class="metrics-row">
-          <div class="mini-metric"><strong>0.7183</strong><span>test ROC-AUC</span></div>
-          <div class="mini-metric"><strong>0.5301</strong><span>test PR-AUC</span></div>
-          <div class="mini-metric"><strong>0.1968</strong><span>test Brier score</span></div>
-          <div class="mini-metric"><strong>34.5%</strong><span>test positive rate</span></div>
-        </div>
-        <div class="experiment-grid"><div class="experiment-block"><h4>Test 上 20% ranking budget</h4><p>63 / 207 flips captured；recall 30.43%、precision 52.50%、recall lift 1.52×；node proxy 約 fixed d6 的 29.68%。</p></div><div class="experiment-block"><h4>Largest model terms</h4><p>move_changed_2_4 為最大正向項；node growth 亦為正向訊號。這些係數描述的是模型內 association，不應被當成因果效果。</p></div></div>
-        <div class="meaning-box"><strong>研究意義</strong><p>Validation ROC-AUC 0.7218 與 test 0.7183 非常接近，顯示 predictive signal 並未在 unseen split 明顯崩潰。此時才有足夠理由把 detector 真正部署到搜尋器。</p></div>
-        <div class="limitation-box"><strong>不能宣稱</strong><p>這只證明 out-of-sample predictive signal；尚未證明 detector-guided policy 能提高實際 win rate，也不能證明每個 d6 change 都更好。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>把 detector score 轉成預先固定的 selective-deepening threshold，然後做真實對弈。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">3.3b</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-locked">Locked out-of-sample test</span><div class="experiment-id">V3-03B</div><h3>Predictive signal 在 unseen test 保留下來</h3></div><span class="experiment-date">2026-08-24～25</span></div><div class="metrics-row"><div class="mini-metric"><strong>0.7183</strong><span>test ROC-AUC</span></div><div class="mini-metric"><strong>0.5301</strong><span>test PR-AUC</span></div><div class="mini-metric"><strong>0.1968</strong><span>Brier</span></div><div class="mini-metric"><strong>34.5%</strong><span>positive rate</span></div></div><div class="experiment-grid"><div class="experiment-block"><h4>20% ranking budget</h4><p>63/207 flips，recall 30.43%、precision 52.50%、lift 1.52×。</p></div><div class="experiment-block"><h4>模型定義</h4><p>完整 target、24 維 φ(x)、normalization、公式與 coefficients 已列於本頁上方。</p></div></div><div class="meaning-box"><strong>意義</strong><p>Validation 0.7218 → test 0.7183，未見明顯 out-of-sample collapse，因此可進入 deployment experiment。</p></div></div></article>
   </section>
 
-  <div class="phase-divider"><span>Phase F · V4 Deployment：把 detector 變成實際搜尋政策</span></div>
+  <div class="phase-divider"><span>Phase F · V4 Deployment</span></div>
   <section class="timeline">
-    <article class="timeline-item">
-      <div class="timeline-marker">4.0</div>
-      <div class="timeline-card">
-        <div class="timeline-head"><div><span class="status-chip status-formal">Pre-registered policy setup</span><div class="experiment-id">V4-01 Threshold Derivation</div><h3>先由 validation 定 threshold，禁止看正式對局後回頭調</h3></div><span class="experiment-date">2026-08-25</span></div>
-        <div class="question-box"><strong>目的</strong><p>將 continuous detector score 轉成可執行 policy，並避免 outcome-driven threshold tuning。</p></div>
-        <div class="experiment-grid"><div class="experiment-block"><h4>Primary policy</h4><p><strong>PSV-20</strong>：validation target deepen fraction = 20%，threshold = <code>0.500931073443522</code>。</p></div><div class="experiment-block"><h4>其他預先產生 threshold</h4><p>PSV-10 / 20 / 30 / 40 / 50 都由 validation score distribution 產生；V4-01 primary 使用 PSV-20。</p></div></div>
-        <div class="meaning-box"><strong>研究意義</strong><p>這不是「找到最佳 threshold」，而是建立一個事前固定的 primary operating point，讓正式對戰結果可以被當成真正的 evaluation，而不是調參資料。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">4.0</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-formal">Pre-registered policy setup</span><div class="experiment-id">V4-01 Threshold Derivation</div><h3>由 validation 固定 PSV operating points</h3></div><span class="experiment-date">2026-08-25</span></div><div class="question-box"><strong>Primary policy</strong><p>PSV-20：validation target deepen fraction 20%，<code>threshold=0.500931073443522</code>。</p></div><div class="meaning-box"><strong>意義</strong><p>Outcome 前凍結 threshold，禁止正式 games 後回頭 retune。</p></div></div></article>
 
-    <article class="timeline-item">
-      <div class="timeline-marker">4.0b</div>
-      <div class="timeline-card">
-        <div class="timeline-head"><div><span class="status-chip status-locked">Fixed-threshold sanity check</span><div class="experiment-id">V4-01 Locked-test Threshold Check</div><h3>同一個固定 threshold 在 locked test 上仍優於隨機分配</h3></div><span class="experiment-date">2026-08-25</span></div>
-        <div class="metrics-row"><div class="mini-metric"><strong>106 / 600</strong><span>PSV-20 selected on test</span></div><div class="mini-metric"><strong>27.54%</strong><span>flip recall</span></div><div class="mini-metric"><strong>53.77%</strong><span>flip precision</span></div><div class="mini-metric"><strong>1.56×</strong><span>recall lift over realized random</span></div></div>
-        <div class="metrics-row"><div class="mini-metric"><strong>75.0%</strong><span>policy move agreement with d6</span></div><div class="mini-metric"><strong>26.95%</strong><span>policy nodes / fixed d6</span></div><div class="mini-metric"><strong>17.67%</strong><span>realized test deepen fraction</span></div><div class="mini-metric"><strong>No retune</strong><span>thresholds adjusted after test = false</span></div></div>
-        <div class="meaning-box"><strong>研究意義</strong><p>固定 threshold 在 unseen test 上仍集中到較多 unstable positions，說明這個 operating point 有合理的 deployment 基礎。</p></div>
-        <div class="limitation-box"><strong>限制</strong><p>這仍是 position-level offline proxy，不是對弈棋力。真正能否改善勝率必須靠正式 games。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">4.0b</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-locked">Fixed-threshold sanity check</span><div class="experiment-id">V4-01 Locked-test Threshold Check</div><h3>固定 threshold 在 locked test 仍有 ranking lift</h3></div><span class="experiment-date">2026-08-25</span></div><div class="metrics-row"><div class="mini-metric"><strong>106/600</strong><span>selected</span></div><div class="mini-metric"><strong>27.54%</strong><span>flip recall</span></div><div class="mini-metric"><strong>53.77%</strong><span>precision</span></div><div class="mini-metric"><strong>1.56×</strong><span>lift</span></div></div><div class="metrics-row"><div class="mini-metric"><strong>75.0%</strong><span>d6 move agreement</span></div><div class="mini-metric"><strong>26.95%</strong><span>nodes / fixed d6</span></div><div class="mini-metric"><strong>17.67%</strong><span>realized deepen fraction</span></div><div class="mini-metric"><strong>No retune</strong><span>threshold fixed</span></div></div></div></article>
 
-    <article class="timeline-item">
-      <div class="timeline-marker">4.1</div>
-      <div class="timeline-card">
-        <div class="timeline-head"><div><span class="status-chip status-formal">Formal game experiment · Validated</span><div class="experiment-id">E3-001 / V4-01 · Position-Level Selective Deepening</div><h3>Detector-guided deepening 第一次轉化成實際棋力提升</h3></div><span class="experiment-date">2026-08-25</span></div>
-        <div class="question-box"><strong>Primary research question</strong><p>PSV-20 能否比 fixed d4 強，同時使用遠少於 fixed d6 的搜尋成本？</p></div>
-        <div class="experiment-grid"><div class="experiment-block"><h4>正式設計</h4><ul><li>50 個預先凍結 openings。</li><li>PSV-20 vs P4：100 games。</li><li>PSV-20 vs P6：100 games。</li><li>每 opening 交換顏色，總計 200 games。</li><li>threshold 在 outcome 前已凍結。</li></ul></div><div class="experiment-block"><h4>政策</h4><p>P4 = fixed d4；P6 = fixed d6；PSV-20 = d4 + ply 6–30 detector gate + triggered d6。</p></div></div>
-        <div class="metrics-row"><div class="mini-metric"><strong>59.0%</strong><span>PSV vs P4 score rate</span></div><div class="mini-metric"><strong>56W / 6D / 38L</strong><span>PSV vs P4</span></div><div class="mini-metric"><strong>51–67%</strong><span>paired bootstrap 95% CI</span></div><div class="mini-metric"><strong>6.40×</strong><span>PSV / P4 nodes</span></div></div>
-        <div class="metrics-row"><div class="mini-metric"><strong>21.0%</strong><span>PSV vs P6 score rate</span></div><div class="mini-metric"><strong>18W / 6D / 76L</strong><span>PSV vs P6</span></div><div class="mini-metric"><strong>13.5–29.0%</strong><span>paired bootstrap 95% CI</span></div><div class="mini-metric"><strong>13.37%</strong><span>PSV / P6 nodes</span></div></div>
-        <div class="metrics-row"><div class="mini-metric"><strong>7,738</strong><span>formal PSV moves</span></div><div class="mini-metric"><strong>2,336</strong><span>detector-eligible moves</span></div><div class="mini-metric"><strong>554</strong><span>triggered d6 calls</span></div><div class="mini-metric"><strong>67.87%</strong><span>triggered calls changing d4 move</span></div></div>
-        <div class="meaning-box"><strong>研究意義</strong><p>這是目前最重要的 deployment 證據：predictive signal 不只停留在 AUC，而是真的能改善相較 fixed d4 的對弈表現；同時相較 fixed d6 只用約 13% nodes，證明 selective computation 有實際節省空間。</p></div>
-        <div class="limitation-box"><strong>但結果也揭露明顯缺口</strong><p>PSV-20 對 P6 只有 21.0% 得分率，遠不能說「已接近 d6 棋力」。而且相較 P4，59% 的棋力提升是用 6.40× node cost 換來的，因此目前 policy 仍不是最終理想 tradeoff。</p></div>
-        <div class="next-box"><strong>因此下一步</strong><p>先診斷到底漏掉多少未觸發 instability，再決定應調 budget、改善 detector recall，或進入 branch-level selective deepening。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item"><div class="timeline-marker">4.1</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-formal">Formal game experiment · Validated</span><div class="experiment-id">E3-001 / V4-01</div><h3>Position-Level Selective Deepening</h3></div><span class="experiment-date">2026-08-25</span></div><div class="question-box"><strong>Research question</strong><p>PSV-20 能否比 fixed d4 強，同時使用遠少於 fixed d6 的 nodes？</p></div><div class="experiment-grid"><div class="experiment-block"><h4>設計</h4><p>50 frozen openings；PSV vs P4 100 games、PSV vs P6 100 games；color-swapped，總 200 games。</p></div><div class="experiment-block"><h4>Policy</h4><p>P4=fixed d4；P6=fixed d6；PSV=d4 + ply 6–30 detector gate + triggered d6。</p></div></div><div class="metrics-row"><div class="mini-metric"><strong>59.0%</strong><span>PSV vs P4 score rate</span></div><div class="mini-metric"><strong>56W/6D/38L</strong><span>vs P4</span></div><div class="mini-metric"><strong>51–67%</strong><span>paired bootstrap CI</span></div><div class="mini-metric"><strong>6.40×</strong><span>PSV/P4 nodes</span></div></div><div class="metrics-row"><div class="mini-metric"><strong>21.0%</strong><span>PSV vs P6 score rate</span></div><div class="mini-metric"><strong>18W/6D/76L</strong><span>vs P6</span></div><div class="mini-metric"><strong>13.5–29.0%</strong><span>paired bootstrap CI</span></div><div class="mini-metric"><strong>13.37%</strong><span>PSV/P6 nodes</span></div></div><div class="metrics-row"><div class="mini-metric"><strong>2,336</strong><span>eligible moves</span></div><div class="mini-metric"><strong>554</strong><span>triggered d6</span></div><div class="mini-metric"><strong>23.72%</strong><span>eligible deepen rate</span></div><div class="mini-metric"><strong>67.87%</strong><span>triggered d6 changed d4 move</span></div></div><div class="meaning-box"><strong>意義</strong><p>Detector signal 已轉成真實棋力提升，且相對 d6 大幅節省 nodes。</p></div><div class="limitation-box"><strong>缺口</strong><p>對 P6 僅 21%，不能宣稱接近 d6；相較 P4 的提升也花了 6.40× nodes。</p></div></div></article>
   </section>
 
-  <div class="phase-divider"><span>Phase G · Current：診斷為什麼仍離 d6 很遠</span></div>
+  <div class="phase-divider"><span>Phase G · Current Diagnosis</span></div>
   <section class="timeline">
-    <article class="timeline-item planned">
-      <div class="timeline-marker">4.2</div>
-      <div class="timeline-card">
-        <div class="timeline-head"><div><span class="status-chip status-planned">Planned · Not yet completed</span><div class="experiment-id">V4-02 · Offline Oracle Replay / Missed-Instability Analysis</div><h3>補跑所有 eligible states 的 d6，找出 detector 到底漏了什麼</h3></div><span class="experiment-date">Current task</span></div>
-        <div class="question-box"><strong>Research question</strong><p>V4-01 與 P6 的巨大棋力差距，主要來自 detector recall 不足、threshold / budget 太保守，還是 whole-position deepening 粒度太粗？</p></div>
-        <div class="experiment-grid"><div class="experiment-block"><h4>Replay source</h4><p>只使用 V4-01 已記錄的 detector-eligible PSV states，不改寫任何 V4-01 primary outcome。</p></div><div class="experiment-block"><h4>四類診斷</h4><ul><li>deepen + d4/d6 differ → useful trigger</li><li>deepen + same → unnecessary deepening</li><li>no deepen + same → correctly saved work</li><li>no deepen + differ → missed instability</li></ul></div></div>
-        <div class="meaning-box"><strong>預期研究價值</strong><p>V4-02 不再只是問「policy 有沒有用」，而是做 failure analysis。它將決定後面該優先做 budget curve、detector improvement，還是 branch-level selective deepening。</p></div>
-        <div class="limitation-box"><strong>目前狀態</strong><p>PLAN — 尚未完成，因此本頁不預先填任何 V4-02 結果。</p></div>
-      </div>
-    </article>
+    <article class="timeline-item planned"><div class="timeline-marker">4.2</div><div class="timeline-card"><div class="timeline-head"><div><span class="status-chip status-planned">Planned · Not yet completed</span><div class="experiment-id">V4-02 · Offline Oracle Replay</div><h3>補跑未觸發 positions 的 d6，找 missed instability</h3></div><span class="experiment-date">Current task</span></div><div class="question-box"><strong>Research question</strong><p>PSV 與 P6 的差距主要來自 detector recall、budget threshold，還是 whole-position deepening granularity？</p></div><div class="experiment-grid"><div class="experiment-block"><h4>四類</h4><p>deepen+different、deepen+same、no-deepen+same、no-deepen+different。</p></div><div class="experiment-block"><h4>最關鍵</h4><p><code>no deepen + different</code> = missed instability。</p></div></div><div class="limitation-box"><strong>狀態</strong><p>尚未完成，因此不預填結果。</p></div></div></article>
   </section>
 
   <section>
-    <h2 class="section-title">把所有實驗放在同一張表</h2>
-    <div class="experiment-table-wrap">
-      <table class="experiment-table">
-        <thead><tr><th>階段</th><th>性質</th><th>核心問題</th><th>最重要結果</th><th>它推動了什麼</th></tr></thead>
-        <tbody>
-          <tr><td>E0</td><td>方法驗證</td><td>搜尋器可信嗎？</td><td>engine / Alpha-Beta / logging / replay 可重現並可測試</td><td>可以開始科學量測</td></tr>
-          <tr><td>E1</td><td>Preliminary</td><td>Search instability 存在嗎？</td><td>d4→d6 flip 32.6%；至少一次 flip 51.8%</td><td>值得做 volatility detection</td></tr>
-          <tr><td>Seed v3 / Probe</td><td>方法驗證</td><td>能公平配對、取得 cheap features 嗎？</td><td>paired-world + deterministic C++ pipeline + multi-signal probe</td><td>能跑 controlled exploratory data</td></tr>
-          <tr><td>V2-02/03</td><td>Exploratory</td><td>哪些 features 值得保留？</td><td>node growth AUC 0.6022；單一 feature 整體偏弱</td><td>改做 multivariate formal detector</td></tr>
-          <tr><td>V3-01</td><td>Formal protocol</td><td>如何避免 leakage / sampling bias？</td><td>凍結 7×7 protocol、split、validator</td><td>建立正式 dataset</td></tr>
-          <tr><td>V3-02</td><td>Formal dataset</td><td>正式 d4→d6 instability 有多少？</td><td>3,000 states；34.63% positive</td><td>可正式 train/validate/test</td></tr>
-          <tr><td>V3-03A</td><td>Validation selection</td><td>哪個 detector 最好？</td><td>Locked logistic C=0.01；val ROC-AUC 0.7218</td><td>凍結模型</td></tr>
-          <tr><td>V3-03B</td><td>Locked test</td><td>Unseen data 還有效嗎？</td><td>test ROC-AUC 0.7183；PR-AUC 0.5301</td><td>允許部署到 search policy</td></tr>
-          <tr><td>V4 threshold</td><td>Pre-registered setup</td><td>怎麼把 score 變 policy？</td><td>PSV-20 threshold = 0.500931...</td><td>固定正式 operating point</td></tr>
-          <tr><td>V4 fixed test</td><td>Locked sanity</td><td>固定 threshold 還有 lift 嗎？</td><td>recall lift 1.56×；26.95% d6 node proxy</td><td>進入正式 games</td></tr>
-          <tr><td>V4-01</td><td>Formal games</td><td>會提升棋力且省成本嗎？</td><td>vs P4 59%；vs P6 21%；P6 cost 13.37%</td><td>證明 selective allocation 有用，但仍有大缺口</td></tr>
-          <tr><td>V4-02</td><td>Planned diagnosis</td><td>缺口到底從哪裡來？</td><td>尚未執行</td><td>決定 budget / detector / branch-level 優先順序</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <h2 class="section-title">所有實驗一覽</h2>
+    <div class="experiment-table-wrap"><table class="experiment-table"><thead><tr><th>階段</th><th>性質</th><th>核心問題</th><th>主要結果</th><th>下一步</th></tr></thead><tbody>
+      <tr><td>E0</td><td>方法驗證</td><td>搜尋器可信嗎？</td><td>engine / Alpha-Beta / logging / replay 可重現</td><td>E1</td></tr>
+      <tr><td>E1</td><td>Preliminary</td><td>Instability 存在嗎？</td><td>d4→d6 32.6%；至少一次 51.8%</td><td>Volatility detection</td></tr>
+      <tr><td>Seed v3 / Probe</td><td>方法驗證</td><td>能 controlled sampling + cheap features 嗎？</td><td>paired deterministic pipeline</td><td>V2 exploratory</td></tr>
+      <tr><td>V2-02/03</td><td>Exploratory</td><td>哪些 signals 值得保留？</td><td>node growth AUC 0.6022；單一 feature 弱</td><td>Formal multivariate detector</td></tr>
+      <tr><td>V3-01</td><td>Protocol</td><td>如何避免 leakage/bias？</td><td>凍結 sampling / predictor / split</td><td>V3-02</td></tr>
+      <tr><td>V3-02</td><td>Formal dataset</td><td>正式 prevalence？</td><td>3,000 states；34.63% positive</td><td>V3-03</td></tr>
+      <tr><td>V3-03A</td><td>Validation</td><td>哪個 detector？</td><td>Locked L2 Logistic C=0.01</td><td>Locked test</td></tr>
+      <tr><td>V3-03B</td><td>Locked test</td><td>Unseen data 有效嗎？</td><td>ROC-AUC 0.7183；PR-AUC 0.5301</td><td>Deployment</td></tr>
+      <tr><td>V4 threshold</td><td>Pre-registered</td><td>score 怎麼轉 policy？</td><td>PSV-20 threshold 0.500931...</td><td>Sanity test</td></tr>
+      <tr><td>V4 fixed test</td><td>Locked sanity</td><td>固定 threshold 有 lift？</td><td>1.56× recall lift</td><td>Formal games</td></tr>
+      <tr><td>V4-01</td><td>Formal games</td><td>棋力 / 成本？</td><td>vs P4 59%；vs P6 21%；13.37% d6 nodes</td><td>Failure diagnosis</td></tr>
+      <tr><td>V4-02</td><td>Planned</td><td>漏掉什麼？</td><td>尚未執行</td><td>Budget / detector / branch-level</td></tr>
+    </tbody></table></div>
   </section>
 
   <section>
-    <h2 class="section-title">模型、政策、對弈結果：三者不能混在一起</h2>
+    <h2 class="section-title">模型、政策、棋力三層定義</h2>
     <div class="model-separation">
-      <div class="card"><strong>Volatility Detector</strong><p>輸入 24 個局面與淺搜 features，輸出 d4→d6 best-move disagreement 的 model score。主要評估 ROC-AUC / PR-AUC / recall / precision。</p></div>
-      <div class="card"><strong>PSV-20 Policy</strong><p>使用固定 threshold 決定某個 eligible position 是否從 d4 加深到 d6。它是 resource-allocation policy，不是分類模型本身。</p></div>
-      <div class="card"><strong>Game Strength</strong><p>真正的棋力必須由 color-swapped games 評估。59% 是 PSV-20 對 P4 的 score rate，不是 detector accuracy。</p></div>
+      <div class="card"><strong>Model</strong><p><code>p̂=P(d4→d6 move change | d4-known features)</code>。Locked L2 Logistic，24 維 encoded input。</p></div>
+      <div class="card"><strong>Policy</strong><p>PSV-20 用固定 threshold 把 model score 轉成「是否跑 d6」。</p></div>
+      <div class="card"><strong>Game Strength</strong><p>只能由 paired color-swapped games 衡量；59% 是 vs P4 score rate，不是 model accuracy。</p></div>
     </div>
   </section>
 
   <section>
-    <h2 class="section-title">目前整條研究鏈支持到哪裡？</h2>
+    <h2 class="section-title">目前證據邊界</h2>
     <div class="current-boundary">
-      <div><strong>✓</strong><span>Search Instability 在 Ataxx 中明顯存在</span></div>
-      <div><strong>✓</strong><span>Cheap features 對 instability 有 out-of-sample predictive signal</span></div>
-      <div><strong>✓</strong><span>Detector-guided d4→d6 deepening 可改善相較 fixed d4 棋力</span></div>
-      <div><strong>✓</strong><span>相較 fixed d6 可節省大量 nodes</span></div>
-      <div><strong>✗</strong><span>尚未證明目前 policy 已接近 d6 或是最佳 budget / granularity</span></div>
+      <div><strong>✓</strong><span>Search Instability 明顯存在</span></div>
+      <div><strong>✓</strong><span>Cheap features 有 out-of-sample signal</span></div>
+      <div><strong>✓</strong><span>Detector-guided deepening 可改善 d4</span></div>
+      <div><strong>✓</strong><span>相對 d6 節省大量 nodes</span></div>
+      <div><strong>✗</strong><span>尚未證明接近 d6 或找到最佳 budget/granularity</span></div>
     </div>
-    <div class="notice warning" style="margin-top:16px"><strong>最嚴格的總結：</strong>目前證據支持「volatility-aware computation allocation 是可行而且有實際效益的方向」，但尚未解決如何在固定資源下逼近更深搜尋的最佳 tradeoff。</div>
+    <div class="notice warning" style="margin-top:16px"><strong>嚴格總結：</strong>目前支持 volatility-aware computation allocation 的可行性與實際效益，但還沒有解決固定資源下如何逼近深搜的最佳 tradeoff。</div>
   </section>
 
   <section>
     <h2 class="section-title">資料來源與展示原則</h2>
     <div class="grid">
-      <a class="card card-link" href="reader.html?id=status"><span class="pill">Current authority</span><h3>PROJECT_STATUS</h3><p>目前已驗證結果、Current Task、Completion Criteria 與下一步。</p></a>
-      <a class="card card-link" href="reader.html?id=v4-results"><span class="pill">Formal result</span><h3>V4-01 完整報告</h3><p>200 場 formal games、成本、paired bootstrap CI 與 detector behavior。</p></a>
-      <a class="card card-link" href="reader.html?id=spec"><span class="pill">Specification</span><h3>SPEC</h3><p>搜尋語義、版本邊界、provenance 與 change-control。</p></a>
+      <a class="card card-link" href="reader.html?id=status"><span class="pill">Current authority</span><h3>PROJECT_STATUS</h3><p>目前已驗證結果與 Current Task。</p></a>
+      <a class="card card-link" href="reader.html?id=v4-results"><span class="pill">Formal result</span><h3>V4-01 完整報告</h3><p>200 場 games、成本、CI 與 detector behavior。</p></a>
+      <a class="card card-link" href="reader.html?id=spec"><span class="pill">Specification</span><h3>SPEC</h3><p>搜尋語義、provenance 與 change-control。</p></a>
     </div>
-    <p class="source-note">本頁是「研究歷程與解釋層」。工程 smoke tests 只用來證明流程可用；exploratory 結果只作 hypothesis / feature screening；只有標示 Formal / Locked 的部分才支撐對應的正式研究結論。公開 Pages 不重新計算結果，private repository、frozen protocol、raw artifacts 與 validator 才是 authority。</p>
+    <p class="source-note">工程 smoke tests 只證明流程可用；exploratory 結果只用於 hypothesis / feature screening；Formal / Locked 才支撐對應正式結論。Private repository、frozen protocol、raw artifacts 與 validators 仍是最終 authority。</p>
   </section>
 </main>
 <script src="assets/site.js"></script>
