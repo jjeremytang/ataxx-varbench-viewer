@@ -1,90 +1,70 @@
-# ATAXX-VarBench Viewer
+# Ataxx-VarBench Public Research Portal
 
-公開的 Ataxx Master Seed 對局查詢與回放介面。
+Public Pages：<https://jjeremytang.github.io/ataxx-varbench-viewer/>
 
-## 直接使用
+本 repository 是 **read-only presentation layer**，不是正式研究引擎。正式 C++ simulation、frozen protocol、model/artifact SHA 與 raw formal results 保存在 private `ataxx-varbench` repository。
 
-https://jjeremytang.github.io/ataxx-varbench-viewer/
+## Pages structure
 
-## 現在的正式架構
+- `index.html` — 研究入口／正式結果摘要／文件與核心程式導覽。
+- `reader.html` — 將 private repo 的指定 Markdown snapshot 轉成友善 HTML article。
+- `code.html` — 核心 C++ source snapshot 靜態閱讀器，含行號與來源 commit。
+- `viewer.html` — 已發布 Seed / game replay viewer。
+- `content/catalog.json` — public snapshot 目錄、private source path 與 source commit。
+- `content/docs/` — 唯讀研究文件 snapshots。
+- `content/code/` — 唯讀核心程式 snapshots。
+- `data/runs/` — 已由 private authoritative C++ engine 產生並發布的 persisted game JSON。
 
-Viewer 已改成 **read-only**：它不再自己執行 Alpha-Beta 或模擬完整對局。
+## Seed Spec
 
-正式流程是：
+### Current: Seed Spec v3
 
-```text
-條件 + case_id
-→ Seed Spec v2 公式產生 Master Seed
-→ private ataxx-varbench 的 C++ ataxx_seed_runner
-→ 正式模擬完整對局
-→ 儲存 JSON
-→ 上傳 viewer/data/runs/
-→ Viewer 讀取與回放
+新 Master Seed 使用 **Seed Spec v3**。最高 bit 為 v3 version marker；其餘 payload 編碼 board / density / agents / case id。
+
+v3 的重要性是：
+
+> 同一 `(board, density, case_id)` 使用相同 `world_key`，所以更換 agent 組合不會改變 world layout。
+
+因此方法比較可以共享同一 world，而不會因為 agent identity 意外換到不同障礙棋盤。
+
+Supported values：
+
+- board：`10, 12, 15`
+- density：`10, 15, 20, 25, 30`%
+- agents：`random, greedy, ab2, ab3, ab4`
+
+### Legacy compatibility: Seed Spec v2
+
+v2 只保留給既有 published pilot runs 解碼／回放。新的 seed generation 以 v3 為準。
+
+## Cross-language regression vectors
+
+Viewer JavaScript 與 private C++ 必須共同通過以下 v3 vectors：
+
+| board | density | Red | Blue | case | seed |
+|---:|---:|---|---|---:|---:|
+| 10 | 10 | random | random | 0 | `9223372036854775808` |
+| 10 | 20 | ab2 | ab4 | 37 | `9223372036854852680` |
+| 15 | 30 | ab4 | greedy | 123456 | `9223372037107614098` |
+| 12 | 25 | greedy | ab3 | 999 | `9223372036856822573` |
+
+`tests/seed-spec.test.js` 在 Pages deploy 前驗證這些 vectors。
+
+## Static snapshot rule
+
+`content/catalog.json` 的 `private_source_commit` 指出目前公開文件／程式 snapshot 對應的 private commit。
+
+- public snapshot 適合閱讀、展示、分享；
+- snapshot 不會在瀏覽器重新跑 Alpha-Beta 或 volatility detector；
+- 若 public snapshot 與 private repo 後續狀態不同，以 private `SPEC.md`、task-specific frozen protocol 與 formal artifacts 為準。
+
+## Deploy validation
+
+GitHub Pages workflow 在 deploy 前執行：
+
+```bash
+node tests/seed-spec.test.js
+node tests/site.test.js
 ```
 
-這樣研究結果只有一個權威來源：private repo 的 C++ `Game / LevelGenerator / SearchEngine`。
-
-## Seed Spec v2
-
-v2 不再「隨機找一個符合條件的 seed」。
-
-Master Seed 直接編碼：
-
-- 棋盤大小
-- 障礙比例
-- 紅方 Agent
-- 藍方 Agent
-- case_id
-
-因此：
-
-> 相同條件 + 相同 case_id 永遠產生相同 Master Seed。
-
-目前 profiles：
-
-- Random
-- Greedy
-- Alpha-Beta d=2
-- Alpha-Beta d=3
-- Alpha-Beta d=4
-
-## Viewer 的 Seed 產生器
-
-網頁上的 Seed 產生器只做數學公式編碼，不掃描 candidate、不用亂數碰運氣。
-
-若產生的 seed 尚未存在於：
-
-```text
-data/runs/<seed>.json
-```
-
-Viewer 會顯示「尚未發布正式模擬資料」，而不在瀏覽器自行重算。
-
-## 正式產生一筆資料
-
-在 private `ataxx-varbench` build 完成後，例如：
-
-```powershell
-.\build\ataxx_seed_runner.exe generate-run 10 20 ab2 ab4 37 ..\ataxx-varbench-viewer\data\runs
-```
-
-這個指令會：
-
-1. 由條件與 case_id 公式算出 Master Seed
-2. 解碼該 seed
-3. 建立固定棋盤
-4. 使用正式 C++ Agent 跑完整對局
-5. 儲存 `data/runs/<seed>.json`
-
-之後把新增 JSON commit / push 到本 repo，GitHub Pages 就能查詢。
-
-## 設計原則
-
-`SeedSpec ≠ Simulation ≠ Viewer`
-
-- SeedSpec：定義實驗 ID / 條件
-- Simulation：正式計算結果
-- SeedStore：保存 JSON
-- Viewer：只負責查詢與回放
-
-這樣避免 browser JavaScript engine 與研究 C++ engine 逐漸產生差異。
+只有 Seed Spec regression 與所有 catalog/local navigation 檔案都存在時才部署。
