@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ATAXX-VarBench 實驗結果總覽：Search Instability、Volatility Detector 與 Position-Level Selective Deepening 的研究意義、正式結果與限制。">
+<title>實驗結果 · ATAXX-VarBench</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main id="app" class="page">
+  <section class="hero result-hero">
+    <div class="eyebrow">Experiment Results · V3 → V4</div>
+    <h1>從搜尋不穩定性<br>到自適應選擇性加深</h1>
+    <p>本研究不是訓練一個「直接預測最佳走法」的模型，而是預測：<strong>目前的淺層搜尋結果，是否可能在更深搜尋後被推翻。</strong>若能提早辨認這類局面，就能把有限搜尋成本集中在真正需要加深的位置。</p>
+    <div class="pill-row">
+      <span class="pill">標準 7×7 Ataxx</span>
+      <span class="pill">Fixed-depth Alpha-Beta</span>
+      <span class="pill">V3-03 Locked Detector</span>
+      <span class="pill">V4-01 Formal 200 Games</span>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">一句話看懂研究主線</h2>
+    <div class="research-flow">
+      <div class="flow-card"><span class="flow-step">1</span><h3>Search Instability</h3><p>同一局面從 d4 搜到 d6 時，最佳走法是否改變？</p></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-card"><span class="flow-step">2</span><h3>Volatility Detection</h3><p>只用局面資訊與 d2/d4 淺搜特徵，預測 d4 是否會被 d6 推翻。</p></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-card"><span class="flow-step">3</span><h3>Selective Deepening</h3><p>高波動局面才從 d4 加深到 d6；其他局面保留 d4。</p></div>
+    </div>
+  </section>
+
+  <section class="meaning-section">
+    <h2 class="section-title">模型到底代表什麼？</h2>
+    <div class="meaning-grid">
+      <div class="meaning-card primary-meaning">
+        <div class="meaning-label">模型的預測目標</div>
+        <h3>P(d4 最佳走法在 d6 改變)</h3>
+        <p>V3-03 的 Logistic Regression 輸出可解讀為「這個局面發生 d4→d6 best-move disagreement 的模型分數／機率估計」。它回答的是<strong>搜尋結果穩不穩定</strong>，而不是哪一步棋最好。</p>
+      </div>
+      <div class="meaning-card">
+        <div class="meaning-label">模型輸入</div>
+        <h3>24 個局面與淺搜特徵</h3>
+        <p>包含局面階段、棋子數、空格數、分支因子、clone/jump 數、立即感染量，以及 d2/d4 的分數、節點量、是否換最佳走法、score swing、node growth 等。</p>
+      </div>
+      <div class="meaning-card">
+        <div class="meaning-label">模型如何被使用</div>
+        <h3>Detector ≠ Search Policy</h3>
+        <p>模型只產生 volatility score。V4-01 的 <strong>PSV-20</strong> 才是搜尋政策：在適用範圍 ply 6–30，分數超過固定 threshold <code>0.500931073443522</code> 時，才從 d4 加深到 d6。</p>
+      </div>
+      <div class="meaning-card caution-card">
+        <div class="meaning-label">不能這樣解讀</div>
+        <h3>它不是「正確率」或「勝率」模型</h3>
+        <ul>
+          <li>不是某一步棋為最佳走法的機率。</li>
+          <li>不是 AI 贏棋的機率。</li>
+          <li>不是 d6 為 ground truth 的機率。</li>
+          <li>不能直接外推到 ply 6–30 之外或其他棋盤。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="notice" style="margin-top:16px"><strong>真正的研究意義：</strong>模型不是替 Alpha-Beta 下棋，而是估計「多花搜尋成本是否可能改變決策」，因此它扮演的是<strong>計算資源分配器</strong>。</div>
+  </section>
+
+  <section>
+    <h2 class="section-title">證據鏈：現象 → 可預測性 → 實際效益</h2>
+    <div class="evidence-grid">
+      <article class="evidence-card">
+        <div class="evidence-tag">V3-02 · Phenomenon</div>
+        <strong class="big-number">34.63%</strong>
+        <h3>d4 → d6 最佳走法改變率</h3>
+        <p>正式 7×7 volatility dataset 共 3,000 個 unique states。約三分之一局面在搜尋加深後改變最佳走法，表示 Search Instability 並非罕見例外，而是足以形成研究問題的現象。</p>
+      </article>
+      <article class="evidence-card">
+        <div class="evidence-tag">V3-03 · Predictability</div>
+        <strong class="big-number">0.7183</strong>
+        <h3>Locked test ROC-AUC</h3>
+        <p>Locked Logistic Regression 的 test PR-AUC 為 <strong>0.5301</strong>。模型具有辨識能力，但遠非完美；這也預告後續 selective policy 可能仍會漏掉重要 instability。</p>
+      </article>
+      <article class="evidence-card">
+        <div class="evidence-tag">V4-01 · Deployment</div>
+        <strong class="big-number">59.0%</strong>
+        <h3>PSV-20 對 fixed d4 得分率</h3>
+        <p>100 場 color-swapped paired games 中，PSV-20 為 56W / 6D / 38L，95% paired bootstrap CI 為 <strong>51.0%–67.0%</strong>。這支持 detector-guided deepening 能轉化成實際棋力提升。</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">V4-01 正式結果</h2>
+    <div class="kpi-grid result-kpis">
+      <div class="kpi"><strong>59.0%</strong><span>PSV-20 vs P4 得分率<br>95% CI 51.0%–67.0%</span></div>
+      <div class="kpi"><strong>21.0%</strong><span>PSV-20 vs P6 得分率<br>95% CI 13.5%–29.0%</span></div>
+      <div class="kpi"><strong>13.37%</strong><span>PSV / P6 節點成本</span></div>
+      <div class="kpi"><strong>67.87%</strong><span>觸發 d6 後真的改變 d4 走法</span></div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="comparison-card good">
+        <h3>相對 fixed d4</h3>
+        <div class="comparison-headline">更強，但更貴</div>
+        <p>PSV-20 得分率 59.0%；但平均節點成本是 P4 的 <strong>6.40×</strong>，wall time 為 <strong>7.10×</strong>。</p>
+      </div>
+      <div class="comparison-card mixed">
+        <h3>相對 fixed d6</h3>
+        <div class="comparison-headline">便宜很多，但仍弱很多</div>
+        <p>PSV 只使用 P6 的 <strong>13.37%</strong> 節點與 <strong>9.15%</strong> wall time，但對 P6 只有 <strong>21.0%</strong> 得分率。</p>
+      </div>
+    </div>
+
+    <div class="notice warning" style="margin-top:16px">因此 V4-01 支持的是：<strong>volatility-aware selective deepening 能改善 d4，並大幅節省相對 d6 的搜尋成本。</strong>它不支持「PSV-20 已經接近 d6 棋力」。</div>
+  </section>
+
+  <section>
+    <h2 class="section-title">模型有沒有真的把成本花在值得的地方？</h2>
+    <div class="allocation-layout">
+      <div class="allocation-stat">
+        <span>Detector-eligible PSV states</span><strong>2,336</strong>
+      </div>
+      <div class="allocation-stat">
+        <span>實際觸發 d6</span><strong>554</strong><small>23.72% of eligible</small>
+      </div>
+      <div class="allocation-stat">
+        <span>觸發後 d4→d6 改走法</span><strong>376</strong><small>67.87% of triggered</small>
+      </div>
+    </div>
+    <p class="section-copy">67.87% 表示目前 detector 的<strong>觸發精準度具有實質意義</strong>：大多數被加深的局面確實會在 d6 改變 d4 決策。但這仍不能回答「沒有被觸發的局面漏掉多少 instability」。這正是 V4-02 必須補做的診斷。</p>
+  </section>
+
+  <section>
+    <h2 class="section-title">目前能下的研究結論</h2>
+    <div class="conclusion-grid">
+      <div class="card"><span class="conclusion-index">01</span><h3>Search Instability 確實存在</h3><p>3,000 個正式 states 中，d4→d6 best-move change rate 為 34.63%。研究主題有可觀察且可量化的現象基礎。</p></div>
+      <div class="card"><span class="conclusion-index">02</span><h3>Instability 有部分可預測性</h3><p>Locked detector 的 test ROC-AUC 0.7183，顯示便宜的局面／淺搜訊號含有與更深搜尋結果變化相關的資訊。</p></div>
+      <div class="card"><span class="conclusion-index">03</span><h3>預測可以轉成搜尋效益</h3><p>PSV-20 實際擊敗 fixed d4，證明 volatility detector 並非只有分類指標上的效果，而能影響最終對弈表現。</p></div>
+      <div class="card"><span class="conclusion-index">04</span><h3>資源分配仍未解決</h3><p>PSV-20 對 P6 只有 21.0% 得分率。瓶頸可能是 detector recall、budget 太低，或 whole-position deepening 粒度太粗，尚待 V4-02 區分。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">下一個實驗為什麼是 V4-02？</h2>
+    <div class="card next-experiment">
+      <div>
+        <span class="pill">Next · Offline Oracle Replay</span>
+        <h3>把 V4-01 的 2,336 個 eligible states 全部離線補跑 d6</h3>
+        <p>目前只知道「有觸發的 554 個局面」發生了什麼；V4-02 要補齊「沒觸發的局面」，才能算出 missed instability，分辨問題到底出在 detector recall、threshold/budget，還是 position-level deepening 本身。</p>
+      </div>
+      <div class="confusion-grid">
+        <div><strong>Deepen + Different</strong><span>Useful trigger</span></div>
+        <div><strong>Deepen + Same</strong><span>Unnecessary deepening</span></div>
+        <div><strong>No deepen + Same</strong><span>Correctly saved work</span></div>
+        <div class="critical"><strong>No deepen + Different</strong><span>Missed instability</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">結果來源與解讀邊界</h2>
+    <div class="grid">
+      <a class="card card-link" href="reader.html?id=v4-results"><span class="pill">正式結果</span><h3>V4-01 完整報告</h3><p>查看 200 場正式對局、成本、detector behavior、paired bootstrap CI 與完整限制。</p></a>
+      <a class="card card-link" href="reader.html?id=status"><span class="pill">進度</span><h3>PROJECT_STATUS</h3><p>查看 V3-02、V3-03、V4-01 最新已驗證結果與 V4-02 completion criteria。</p></a>
+      <a class="card card-link" href="reader.html?id=spec"><span class="pill">規格</span><h3>研究規格</h3><p>查看目前搜尋語義、版本邊界、provenance 與 change-control 規則。</p></a>
+    </div>
+    <div class="notice" style="margin-top:16px">本頁是展示與解釋層，不重新計算任何正式數據。正式研究權威仍為 private repository、凍結 protocol、raw artifacts 與 validator。</div>
+  </section>
+</main>
+<script src="assets/site.js"></script>
+<script>SITE.safeInit(SITE.initResults);</script>
+</body>
+</html>
