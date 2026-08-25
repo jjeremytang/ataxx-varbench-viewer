@@ -1,0 +1,231 @@
+# V4-01 Formal Results — Position-Level Selective Deepening
+
+## 1. Research question
+
+V4-01 evaluates whether the locked V3-03 volatility detector can guide position-level selective deepening from d4 to d6 and obtain a better strength/cost tradeoff than fixed-depth search.
+
+Primary question:
+
+> Can a detector-guided policy become stronger than fixed d4 while using materially less search cost than fixed d6?
+
+The primary selective policy is `PSV-20`, using the validation-derived fixed threshold `0.500931073443522`. The detector is used only for ply 6–30. Thresholds were frozen before formal game outcomes and were not adjusted afterward.
+
+Protocol: `docs/v4_01_position_selective_deepening_protocol.md`
+
+## 2. Formal experiment design
+
+- Board: standard 7×7 Ataxx
+- Obstacles: none
+- Frozen openings: 50
+- Opening prefix: exactly 4 random legal plies under the frozen opening procedure
+- Matchups:
+  - `PSV-20 vs P4`: 100 games
+  - `PSV-20 vs P6`: 100 games
+- Each opening is played twice per matchup with colors swapped.
+- Total formal games: 200
+- Build: Release
+- Formal raw-result commit: `629337722514da0fc478a8804018b3b79b77497e`
+- Formal request commit: `a4cec8e1a04d36f29077328be8f6cb66d57ea137`
+- Raw result path: `results/v4_01_formal_primary/`
+- Validation manifest: `results/v4_01_formal_primary/run_manifest.json`
+- Analysis summary: `results/v4_01_formal_primary/analysis_summary.json`
+
+Validation result:
+
+- 200 / 200 games validated
+- 15,485 move rows validated
+- 188 natural terminations
+- 12 repetition terminations
+- opening, threshold and model-selection provenance matched the frozen artifacts
+
+## 3. Playing-strength results
+
+Score rate is defined as:
+
+`(wins + 0.5 × draws) / games`
+
+| Matchup | PSV wins | Draws | PSV losses | PSV score rate | 95% paired bootstrap CI |
+|---|---:|---:|---:|---:|---:|
+| PSV-20 vs P4 | 56 | 6 | 38 | **59.0%** | **51.0%–67.0%** |
+| PSV-20 vs P6 | 18 | 6 | 76 | **21.0%** | **13.5%–29.0%** |
+
+The confidence interval is bootstrapped over the 50 color-swapped opening pairs, not over individual games.
+
+### 3.1 PSV-20 vs P4
+
+PSV-20 scored 59.0% against fixed d4. The paired bootstrap interval is 51.0%–67.0%.
+
+This supports the conclusion that the implemented selective-deepening policy improves actual playing strength over fixed d4 under the tested setup.
+
+Paired-opening scores for PSV across the 50 openings:
+
+| PSV score across the color-swapped pair | Opening count |
+|---:|---:|
+| 0.0 | 4 |
+| 0.5 | 3 |
+| 1.0 | 27 |
+| 1.5 | 3 |
+| 2.0 | 13 |
+
+### 3.2 PSV-20 vs P6
+
+PSV-20 scored only 21.0% against fixed d6, with a paired bootstrap interval of 13.5%–29.0%.
+
+This does **not** support a claim that PSV-20 has playing strength close to fixed d6.
+
+Paired-opening scores for PSV across the 50 openings:
+
+| PSV score across the color-swapped pair | Opening count |
+|---:|---:|
+| 0.0 | 29 |
+| 0.5 | 4 |
+| 1.0 | 14 |
+| 1.5 | 2 |
+| 2.0 | 1 |
+
+The large number of 0-point opening pairs against P6 shows that the gap is not explained only by color assignment.
+
+## 4. Color effect
+
+PSV score rate by color:
+
+| Matchup | PSV as Red | PSV as Blue |
+|---|---:|---:|
+| vs P4 | 64% | 54% |
+| vs P6 | 31% | 11% |
+
+The color effect is substantial, especially against P6. This validates the decision to use color-swapped paired games for the formal experiment.
+
+## 5. Search-cost results
+
+### 5.1 PSV-20 vs P4
+
+| Policy | Nodes / game | Wall time / game | Mean move time | Median move time |
+|---|---:|---:|---:|---:|
+| PSV-20 | 3,680,027.97 | 40.193 s | 1.040 s | 0.133 s |
+| P4 | 575,290.70 | 5.664 s | 0.146 s | 0.118 s |
+
+Cost ratios:
+
+- PSV / P4 nodes = **6.40×**
+- PSV / P4 wall time = **7.10×**
+
+Therefore the improvement from 50% baseline expectation to 59% score rate is not free: the current implementation is substantially more expensive than fixed d4.
+
+### 5.2 PSV-20 vs P6
+
+| Policy | Nodes / game | Wall time / game | Mean move time | Median move time |
+|---|---:|---:|---:|---:|
+| PSV-20 | 3,077,744.97 | 26.601 s | 0.687 s | 0.124 s |
+| P6 | 23,020,993.42 | 290.786 s | 7.518 s | 4.697 s |
+
+Cost ratios:
+
+- PSV / P6 nodes = **13.37%**
+- PSV / P6 wall time = **9.15%**
+
+Thus PSV-20 is dramatically cheaper than fixed d6, but its 21% score rate against P6 shows that the saved computation also corresponds to a large remaining strength gap.
+
+Node count should be treated as the more architecture-independent cost proxy. Wall-clock values are useful practical measurements but were collected across parallel GitHub-hosted runners and therefore should not be interpreted as precision hardware benchmarks.
+
+## 6. Detector behavior during formal games
+
+Across all 200 games:
+
+- PSV moves: **7,738**
+- detector-eligible moves: **2,336**
+- detector-ineligible moves: **5,402**
+- eligible fraction of PSV moves: **30.19%**
+- d6 calls: **554**
+- realized deepen rate among eligible moves: **23.72%**
+- realized deepen rate among all PSV moves: **7.16%**
+- d6 calls per game: **2.77**
+- deepened moves where d6 changed the d4 best move: **376**
+- changed fraction among deepened moves: **67.87%**
+
+The `PSV-20` name denotes the validation target fraction. It does not force exactly 20% of future game positions to deepen. The fixed threshold produced a 23.72% realized eligible deepen fraction in formal games, indicating a distribution shift between the validation positions and encountered game positions.
+
+The fact that 67.87% of triggered d6 searches changed the d4 move shows that deepening was usually decision-relevant rather than merely recomputing the same move.
+
+### By matchup
+
+| Metric | vs P4 | vs P6 |
+|---|---:|---:|
+| PSV moves | 3,866 | 3,872 |
+| Eligible moves | 1,175 | 1,161 |
+| Eligible fraction | 30.39% | 29.98% |
+| Deepened moves | 296 | 258 |
+| Eligible deepen rate | 25.19% | 22.22% |
+| All-move deepen rate | 7.66% | 6.66% |
+| d4→d6 move changed | 206 | 170 |
+| Changed among deepened | 69.59% | 65.89% |
+| d6 calls / game | 2.96 | 2.58 |
+
+The detector behavior is broadly similar across the two primary matchups and does not show a complete gating collapse in either one.
+
+## 7. Offline fixed-threshold sanity check
+
+Before formal games, the frozen `PSV-20` threshold was applied to the locked V3-03 test predictions without any threshold adjustment.
+
+Results on 600 test positions:
+
+- selected: 106 / 600 = **17.67%**
+- captured d4→d6 flips: 57 / 207
+- flip recall: **27.54%**
+- flip precision: **53.77%**
+- recall lift over realized random selection: **1.56×**
+- move agreement with fixed d6: **75.0%**
+- policy node proxy including d2 / fixed d6: **26.95%**
+
+This sanity check supported continuing to formal game-strength evaluation, but it was not used to modify the threshold.
+
+## 8. Main interpretation
+
+V4-01 supports the following statement:
+
+> Within the tested standard 7×7 Ataxx setting and the detector's trained ply 6–30 domain, volatility-aware position-level selective deepening can improve playing strength over fixed d4 while using far less search cost than fixed d6.
+
+However, V4-01 also shows a clear limitation:
+
+> The current PSV-20 policy remains far weaker than fixed d6. A 21% score rate against P6 does not support the claim that the policy achieves d6-like playing strength.
+
+The most compact description of the observed tradeoff is:
+
+- compared with P4: **stronger, but much more expensive**;
+- compared with P6: **much cheaper, but much weaker**.
+
+Therefore V4-01 demonstrates that selective allocation is useful, but it does not yet solve the resource-allocation problem well enough to replace fixed d6.
+
+## 9. What should not be claimed
+
+The current results do not establish that:
+
+- PSV-20 is close to fixed d6 strength;
+- the 20% validation target is the optimal budget;
+- d6 is ground truth or perfect play;
+- the detector is valid outside ply 6–30;
+- the same results generalize to other board sizes or obstacle layouts;
+- branch-level selective deepening is superior before it is separately tested.
+
+The primary threshold must not be retuned on these same formal outcomes and then presented as if it were still the preregistered primary experiment.
+
+## 10. Research implication and next step
+
+The next question is no longer simply whether selective deepening works. V4-01 shows that it can improve over d4, but the gap to d6 remains large.
+
+The next diagnostic task is therefore to determine **why**:
+
+1. the detector may miss many positions where d4 and d6 would disagree;
+2. the position-level budget may be too low for the desired strength target;
+3. whole-position d4→d6 deepening may be too coarse and may spend nodes on branches that do not need extra depth.
+
+Recommended next task: `V4-02 — Offline Oracle Replay`.
+
+Replay the recorded formal PSV states offline, run d6 on all detector-eligible states, and classify them into:
+
+- deepen + d4/d6 differ: useful trigger;
+- deepen + d4/d6 same: unnecessary deepening for move choice;
+- no deepen + d4/d6 same: correctly saved work;
+- no deepen + d4/d6 differ: missed instability.
+
+This diagnosis should precede any new detector training or branch-level policy implementation.
