@@ -1,0 +1,206 @@
+# ATAXX Project Specification
+
+> **Canonical global specification — v1.0.0**  
+> Last updated: 2026-08-25
+
+本文件定義目前 ATAXX 專題的**全域規格與版本邊界**。即時進度仍以 `PROJECT_STATUS.md` 為準；已完成實驗的 frozen protocol 不回頭改寫。
+
+## 1. Authority hierarchy
+
+當文件或程式敘述互相衝突時，依下列順序判定：
+
+1. `SPEC.md`：目前全域規格與版本規則。
+2. 已凍結的 experiment protocol：該次正式實驗的實驗條件；產生 outcome 後視為 immutable。
+3. machine-readable manifests / SHA-256：實際資料與 artifact provenance。
+4. `PROJECT_STATUS.md`：目前 Current Task、狀態與下一步。
+5. `PROJECT.md`：研究方向與方法概覽，不保存細部 runtime constants。
+6. README / logs：導覽與歷史紀錄，不作為規格來源。
+
+若要改變會影響正式實驗語義的規格，必須建立新的 protocol / schema version，不得覆寫已完成實驗的規格。
+
+## 2. Current version registry
+
+| Component | Current | Compatibility / note |
+|---|---|---|
+| Project spec | `1.0.0` | 本文件 |
+| Ataxx rule semantics | `rules-1` | `RULES.md` + `Game` implementation |
+| Search semantics | `search-1` | fixed-depth Alpha-Beta；目前正式研究未使用 Iterative Deepening |
+| Board encoding | `board-rowmajor-1` | row-major，`.` / `R` / `B` / `#` |
+| Move token | `move-token-1` | `C:r:c:r:c` / `J:r:c:r:c` / `P` |
+| Seed Spec | **v3 current** | v2 僅保留 decode / replay compatibility |
+| V3 detector | `M1_logistic_C_0.01` | locked artifact；不得依 V4 outcome 重選 |
+| V4-01 policy | `PSV-20` primary | validation-derived fixed threshold |
+| V4-01 formal result | frozen | raw result commit `629337722514da0fc478a8804018b3b79b77497e` |
+
+Machine-readable mirror: `spec/project_spec.json`.
+
+## 3. Ataxx rule semantics
+
+Authoritative human-readable rule description: `RULES.md`.
+
+Current engine invariants:
+
+- minimum board size: 4;
+- players: Red first, Blue second;
+- distance metric: Chebyshev distance;
+- distance 1 = Clone;
+- distance 2 = Jump;
+- after a move, adjacent enemy pieces at Chebyshev distance 1 are infected;
+- forced Pass only when no legal normal move exists;
+- terminal if either color has zero pieces, no Empty square remains, two consecutive passes occur, or the same complete state repeats;
+- repetition state key includes board, side to move, and consecutive-pass count;
+- repetition terminates as a draw.
+
+### Primary research board
+
+Unless an experiment protocol explicitly says otherwise:
+
+- board: standard `7×7`;
+- start layout: `Standard`;
+- obstacles: none.
+
+Procedural `N×N` / obstacle boards are extension experiments, not the primary V3/V4 claim domain.
+
+## 4. Search semantics
+
+Current authoritative search implementation is `SearchEngine` in `include/search.hpp` / `src/search.cpp`.
+
+- fixed-depth Alpha-Beta;
+- evaluation before terminal: piece difference from the root player's perspective;
+- terminal win/loss uses a large win constant plus/minus piece difference;
+- repetition evaluates as draw (`0`);
+- internal nodes use deterministic heuristic move ordering;
+- root tie-breaking follows legal-move generation order because root moves are not re-ordered before comparison;
+- each independent `SearchEngine::search` call starts with a fresh node counter;
+- V3/V4 d2/d4/d6 measurements are independent search calls unless a later protocol explicitly introduces tree reuse.
+
+**Iterative Deepening is not part of the currently implemented/formal V3/V4 baseline.** If introduced later, it requires its own implementation version and verification.
+
+## 5. V3 formal volatility domain
+
+Frozen formal dataset:
+
+`data/search/v3_02_formal_7x7_d4_d6_seed_20260824_parallel/`
+
+- 3000 unique positions;
+- standard 7×7, no obstacles;
+- phases:
+  - early: ply 6–13;
+  - mid: ply 14–21;
+  - late: ply 22–30;
+- split: train 1800 / validation 600 / test 600;
+- search depths: d2 / d4 / d6;
+- primary instability label: `label_move_changed_4_6`.
+
+The parallel frozen-position + shard pipeline is the authoritative V3-02 formal dataset path. The older monolithic collector is historical/superseded and must not be treated as an equivalent current formal entry point.
+
+## 6. Locked V3-03 detector
+
+- model: `M1_logistic_C_0.01`;
+- family: L2 Logistic Regression;
+- selection artifact: `results/v3_03_validation/selection.json`;
+- selection SHA-256: `44c22eaf876d0fb7e046f6b79fdc4eb2b172ac94a4c8a496a22727e20b1c1cfb`;
+- source dataset SHA-256: `752ab3caa88aa5b71e58364ff974f35aed45818fd6057c192ab4f843b815e928`;
+- applicability domain: ply 6–30;
+- target: d4→d6 best-move disagreement.
+
+The detector may use only features available after d4 and before d6. No d6-derived value may enter online gating.
+
+Model/preprocessing constants duplicated into online C++ must remain numerically identical to the locked artifact. `tools/validate_project_spec.py` is responsible for detecting registry/provenance drift; numerical score parity should remain covered by dedicated detector parity tests before future policy changes.
+
+## 7. V4-01 position-level selective deepening
+
+Frozen protocol: `docs/v4_01_position_selective_deepening_protocol.md`.
+
+Primary policy `PSV-20`:
+
+1. always run d4;
+2. outside ply 6–30, use d4 directly;
+3. inside ply 6–30, run d2 and compute the locked detector score;
+4. if score is below the fixed threshold, use d4;
+5. otherwise run d6 and adopt the d6 move.
+
+Primary threshold:
+
+`0.500931073443522`
+
+Threshold artifact SHA-256:
+
+`641d568427e36cd3cb893fbe5d495f6e3596019f5451e433e84d2aff60d32f52`
+
+Frozen formal opening CSV SHA-256:
+
+`9ed4bf2c1137e2a6f61a3386a021514f85cca9988072c0580e0bff2802dcba49`
+
+The q10/q30/q40/q50 thresholds remain predeclared secondary budget points. They are not substitutes for the primary PSV-20 result and must not be selected post hoc as a new primary threshold.
+
+## 8. V4-01 verified formal result boundary
+
+Formal raw-result commit:
+
+`629337722514da0fc478a8804018b3b79b77497e`
+
+Verified result summary:
+
+- `PSV-20 vs P4`: 56W / 6D / 38L, score rate 59.0%, paired bootstrap 95% CI 51.0%–67.0%;
+- `PSV-20 vs P6`: 18W / 6D / 76L, score rate 21.0%, paired bootstrap 95% CI 13.5%–29.0%;
+- PSV/P4 node ratio: 6.40×;
+- PSV/P6 node ratio: 13.37%;
+- 554 formal d6 calls, 376 changed the d4 move (67.87%).
+
+Supported claim: PSV-20 improves over fixed d4 while using far less search cost than fixed d6.
+
+Unsupported claim: PSV-20 has playing strength close to fixed d6.
+
+Full result: `docs/v4_01_formal_results.md`.
+
+## 9. Seed Spec policy
+
+### Current generation format: v3
+
+New Master Seeds must be generated with `SeedCodecV3`.
+
+v3 guarantees that the same `(board, density, case_id)` maps to the same `world_key`; agent choices affect the Master Seed but not the shared world layout.
+
+### Legacy compatibility: v2
+
+v2 is retained only so historical published runs can be decoded and replayed. New data generation must not silently fall back to v2.
+
+C++ and public Viewer JavaScript implementations must share fixed known-vector tests.
+
+## 10. Program status policy
+
+Every executable/tool is classified as one of:
+
+- **authoritative-current**: allowed for new formal work;
+- **experiment-frozen**: retained to reproduce a completed protocol; change requires a new protocol/schema;
+- **utility-current**: maintained engineering/helper tool;
+- **legacy-pilot**: historical only; must not be used for new formal claims;
+- **one-time-archive**: historical migration/patch mechanism; must not remain an active workflow.
+
+Detailed mapping: `docs/code_registry.md`.
+
+## 11. Output schema and provenance rule
+
+Every new formal artifact must record, either per file or in a run-level manifest:
+
+- project/spec version;
+- source commit / runner provenance;
+- board/rule configuration;
+- build type where compiled code is used;
+- relevant frozen artifact SHA-256 values;
+- data class (`pilot`, `formal`, `probe`, `derived`, `diagnostics`);
+- schema version;
+- validator status.
+
+Older frozen artifacts are not rewritten only to add new metadata. Missing metadata is documented at the run-manifest / derived-analysis level instead.
+
+## 12. Change-control rule
+
+A change is **semantic** if it can alter game states, legal moves, search scores, best-move tie-breaking, detector scores, gating decisions, sampling distribution, or outcome interpretation.
+
+Semantic changes require:
+
+`PLAN → IMPLEMENT → VERIFY → new protocol/schema version → RUN`
+
+Pure presentation/documentation changes may reuse existing verified data, but must not modify frozen raw outcomes.
