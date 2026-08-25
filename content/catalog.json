@@ -1,0 +1,152 @@
+{
+  "site_schema": 1,
+  "private_source_repo": "jjeremytang/ataxx-varbench",
+  "private_source_commit": "ed83710e383e104f7212f3a79e700062bc07b32c",
+  "authority_note": "This site is a read-only presentation snapshot. The private repository and frozen experiment artifacts remain authoritative.",
+  "items": [
+    {
+      "id": "spec",
+      "type": "doc",
+      "group": "規格",
+      "title": "ATAXX Project Specification",
+      "description": "目前全域語義、版本、provenance 與 change-control 的最高層規格。",
+      "source_path": "SPEC.md",
+      "snapshot_path": "content/docs/spec.md.txt"
+    },
+    {
+      "id": "status",
+      "type": "doc",
+      "group": "進度",
+      "title": "Project Status",
+      "description": "目前 Current Task、完成條件、最近已驗證研究結果。",
+      "source_path": "PROJECT_STATUS.md",
+      "snapshot_path": "content/docs/status.md.txt"
+    },
+    {
+      "id": "project",
+      "type": "doc",
+      "group": "研究",
+      "title": "研究問題與方法",
+      "description": "Search Instability → Volatility Detection → Selective Deepening 主線。",
+      "source_path": "PROJECT.md",
+      "snapshot_path": "content/docs/project.md.txt"
+    },
+    {
+      "id": "rules",
+      "type": "doc",
+      "group": "規格",
+      "title": "Ataxx 規則",
+      "description": "棋盤、Clone/Jump、infection、Pass、終局與 repetition semantics。",
+      "source_path": "RULES.md",
+      "snapshot_path": "content/docs/rules.md.txt"
+    },
+    {
+      "id": "workflow",
+      "type": "doc",
+      "group": "流程",
+      "title": "研究協作與驗證流程",
+      "description": "PLAN → IMPLEMENT → VERIFY → RUN → ANALYZE → DOCUMENT。",
+      "source_path": "WORKFLOW.md",
+      "snapshot_path": "content/docs/workflow.md.txt"
+    },
+    {
+      "id": "v4-results",
+      "type": "doc",
+      "group": "正式結果",
+      "title": "V4-01 Position-Level Selective Deepening",
+      "description": "200 場正式 paired/color-swapped 對戰的棋力、成本與 detector 行為。",
+      "source_path": "docs/v4_01_formal_results.md",
+      "snapshot_path": "content/docs/v4-results.md.txt"
+    },
+    {
+      "id": "code-registry",
+      "type": "doc",
+      "group": "維護",
+      "title": "Code & Workflow Registry",
+      "description": "哪些程式是 authoritative-current、experiment-frozen、legacy-pilot。",
+      "source_path": "docs/code_registry.md",
+      "snapshot_path": "content/docs/code-registry.md.txt"
+    },
+    {
+      "id": "audit",
+      "type": "doc",
+      "group": "維護",
+      "title": "2026-08-25 Standardization Audit",
+      "description": "版本漂移、legacy workflow、Seed Spec 雙實作與 CI 問題的稽核紀錄。",
+      "source_path": "docs/standardization_audit_2026-08-25.md",
+      "snapshot_path": "content/docs/audit.md.txt"
+    },
+    {
+      "id": "ataxx-hpp",
+      "type": "code",
+      "group": "Core",
+      "title": "ataxx.hpp",
+      "source_path": "include/ataxx.hpp",
+      "snapshot_path": "content/code/ataxx.hpp.txt"
+    },
+    {
+      "id": "ataxx-cpp",
+      "type": "code",
+      "group": "Core",
+      "title": "ataxx.cpp",
+      "source_path": "src/ataxx.cpp",
+      "snapshot_path": "content/code/ataxx.cpp.txt"
+    },
+    {
+      "id": "search-hpp",
+      "type": "code",
+      "group": "Search",
+      "title": "search.hpp",
+      "source_path": "include/search.hpp",
+      "snapshot_path": "content/code/search.hpp.txt"
+    },
+    {
+      "id": "search-cpp",
+      "type": "code",
+      "group": "Search",
+      "title": "search.cpp",
+      "source_path": "src/search.cpp",
+      "snapshot_path": "content/code/search.cpp.txt"
+    },
+    {
+      "id": "seed-spec-hpp",
+      "type": "code",
+      "group": "Seed Spec",
+      "title": "seed_spec.hpp",
+      "source_path": "include/seed_spec.hpp",
+      "snapshot_path": "content/code/seed_spec.hpp.txt"
+    },
+    {
+      "id": "seed-spec-cpp",
+      "type": "code",
+      "group": "Seed Spec",
+      "title": "seed_spec.cpp",
+      "source_path": "src/seed_spec.cpp",
+      "snapshot_path": "content/code/seed_spec.cpp.txt"
+    },
+    {
+      "id": "v4-policy",
+      "type": "code",
+      "group": "V4 Frozen",
+      "title": "v4_policy_runner.cpp",
+      "source_path": "src/v4_policy_runner.cpp",
+      "snapshot_path": "content/code/v4_policy_runner.cpp.txt"
+    },
+    {
+      "id": "volatility-positions",
+      "type": "code",
+      "group": "V3 Frozen",
+      "title": "volatility_positions.cpp",
+      "source_path": "src/volatility_positions.cpp",
+      "snapshot_path": "content/code/volatility_positions.cpp.txt"
+    },
+    {
+      "id": "volatility-shard",
+      "type": "code",
+      "group": "V3 Frozen",
+      "title": "volatility_shard.cpp",
+      "source_path": "src/volatility_shard.cpp",
+      "snapshot_path": "content/code/volatility_shard.cpp.txt"
+    }
+  ]
+}
