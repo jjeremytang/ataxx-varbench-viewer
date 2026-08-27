@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ATAXX-VarBench 專題研究樹狀圖：研究主線、實驗結果、workflow、資料規則與下一步。">
+<title>ATAXX-VarBench 專題樹狀圖</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+:root{
+  --tree-done:#16a34a;
+  --tree-done-bg:#dcfce7;
+  --tree-weak:#d97706;
+  --tree-weak-bg:#fef3c7;
+  --tree-active:#2563eb;
+  --tree-active-bg:#dbeafe;
+  --tree-blocked:#dc2626;
+  --tree-blocked-bg:#fee2e2;
+  --tree-planned:#6b7280;
+  --tree-planned-bg:#f3f4f6;
+  --tree-edge:#9aa8bd;
+}
+.tree-page{max-width:1500px}.tree-hero{margin-bottom:18px}.tree-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}.tree-toolbar input,.tree-toolbar select{min-height:40px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#1f2937;padding:8px 11px;font:inherit}.tree-toolbar input{min-width:min(320px,100%);flex:1}.tree-toolbar .btn{min-height:40px}.legend{display:flex;gap:10px 16px;flex-wrap:wrap;margin:12px 0 18px;color:#526178;font-size:13px}.legend-item{display:inline-flex;align-items:center;gap:7px}.legend-dot{width:11px;height:11px;border-radius:999px;display:inline-block}.legend-dot.done{background:var(--tree-done)}.legend-dot.weak{background:var(--tree-weak)}.legend-dot.active{background:var(--tree-active)}.legend-dot.blocked{background:var(--tree-blocked)}.legend-dot.planned{background:var(--tree-planned)}
+.tree-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}.tree-card,.detail-panel{background:#fff;border:1px solid #dfe5ef;border-radius:16px}.tree-card{overflow:hidden}.tree-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:15px 17px;border-bottom:1px solid #e5eaf2;background:#f8fafc}.tree-head strong{display:block}.tree-head small{color:#718096}.tree-viewport{overflow:auto;min-height:690px;max-height:calc(100vh - 250px);background:
+linear-gradient(#f8fafc 1px,transparent 1px),
+linear-gradient(90deg,#f8fafc 1px,transparent 1px),#fff;background-size:32px 32px}.tree-viewport svg{display:block;min-width:100%;min-height:680px}.detail-panel{padding:18px;position:sticky;top:76px}.detail-panel h2{font-size:21px;margin:6px 0 8px;line-height:1.3}.detail-panel h3{font-size:15px;margin:18px 0 6px}.detail-panel p,.detail-panel li{color:#5d6b82;font-size:14px}.detail-panel ul{padding-left:19px}.detail-panel code{background:#f1f5f9;border-radius:5px;padding:2px 5px}.detail-status{display:inline-flex;align-items:center;gap:7px;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.detail-status.done{background:var(--tree-done-bg);color:#166534}.detail-status.weak{background:var(--tree-weak-bg);color:#92400e}.detail-status.active{background:var(--tree-active-bg);color:#1d4ed8}.detail-status.blocked{background:var(--tree-blocked-bg);color:#991b1b}.detail-status.planned{background:var(--tree-planned-bg);color:#4b5563}.metric-list{display:grid;grid-template-columns:1fr;gap:7px;margin-top:10px}.metric{border:1px solid #e2e8f0;border-radius:10px;padding:9px 10px;background:#f8fafc}.metric strong{display:block;font-size:15px}.metric span{color:#64748b;font-size:12px}.tree-caption{padding:11px 17px;border-top:1px solid #e5eaf2;color:#718096;font-size:12px;background:#f8fafc}.current-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 20px}.current-strip .kpi strong{font-size:20px}.current-strip .kpi.current{border-color:#93b4f3;background:#f7faff}.current-strip .kpi.weak{border-color:#e9c173;background:#fffaf0}.node-hit{cursor:pointer;outline:none}.node-hit:focus .node-frame{stroke-width:4}.node-title{font-weight:800;fill:#172033}.node-subtitle{fill:#607089}.node-meta{fill:#718096}.node-toggle{cursor:pointer}.node-toggle text{font-weight:900;fill:#334155;pointer-events:none}.edge-label{font-size:11px;fill:#64748b}.search-dim{opacity:.18}.search-hit .node-frame{stroke-width:4;filter:drop-shadow(0 0 4px rgba(37,99,235,.28))}.selected .node-frame{stroke-width:4}.empty-state{padding:14px;background:#f8fafc;border-radius:12px;color:#64748b;font-size:14px}
+@media(max-width:980px){.tree-layout{grid-template-columns:1fr}.detail-panel{position:static}.tree-viewport{max-height:none}.current-strip{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.current-strip{grid-template-columns:1fr}.tree-head{flex-direction:column}.tree-toolbar input{min-width:100%}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">ATAXX-VarBench</a>
+    <nav class="nav" aria-label="主要導覽">
+      <a href="index.html">研究入口</a>
+      <a href="results.html">實驗結果</a>
+      <a href="project-tree.html" aria-current="page"><strong>專題樹狀圖</strong></a>
+      <a href="viewer.html">對局檢視器</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page tree-page">
+  <section class="hero tree-hero">
+    <div class="eyebrow">Project Structure · Research Evidence · Current Progress</div>
+    <h1>ATAXX 專題<br>互動式研究樹</h1>
+    <p>把整個專題拆成「研究基礎 → Search Instability → Volatility Detection → Selective Deepening → Ataxx-specific Conversion Dynamics」，並同步標示實驗證據、workflow 與資料使用狀態。</p>
+    <div class="pill-row">
+      <span class="pill">目前階段：V4-06</span>
+      <span class="pill">Ataxx-Specific Selective Deepening</span>
+      <span class="pill">主棋盤：7×7 / 無障礙</span>
+      <span class="pill">Reference：Fixed-depth d6</span>
+    </div>
+  </section>
+
+  <section class="current-strip" aria-label="目前關鍵狀態">
+    <div class="kpi"><strong>34.63%</strong><span>V3-02 d4→d6 best-move disagreement</span></div>
+    <div class="kpi"><strong>59.0%</strong><span>V4-01 PSV 對 P4 得分率</span></div>
+    <div class="kpi weak"><strong>WEAK</strong><span>V4-05 fresh learned Top-3 gate</span></div>
+    <div class="kpi current"><strong>V4-06</strong><span>Conversion-Swing / Cascade：目前工作</span></div>
+  </section>
+
+  <section>
+    <div class="tree-toolbar" aria-label="樹狀圖控制">
+      <input id="treeSearch" type="search" placeholder="搜尋節點，例如 V4-05、conversion、seed、workflow…" aria-label="搜尋專題樹">
+      <select id="statusFilter" aria-label="依狀態篩選">
+        <option value="all">全部進度</option>
+        <option value="done">已驗證完成</option>
+        <option value="weak">完成但 WEAK</option>
+        <option value="active">進行中</option>
+        <option value="blocked">Blocked</option>
+        <option value="planned">Planned</option>
+      </select>
+      <button class="btn" id="expandAll" type="button">全部展開</button>
+      <button class="btn" id="collapseSupport" type="button">收合支援分支</button>
+      <button class="btn primary" id="focusCurrent" type="button">定位 V4-06</button>
+    </div>
+
+    <div class="legend" aria-label="進度顏色圖例">
+      <span class="legend-item"><span class="legend-dot done"></span>已驗證完成</span>
+      <span class="legend-item"><span class="legend-dot weak"></span>完成但結論 WEAK</span>
+      <span class="legend-item"><span class="legend-dot active"></span>目前進行中 / 已建置未驗證</span>
+      <span class="legend-item"><span class="legend-dot blocked"></span>等待前置條件</span>
+      <span class="legend-item"><span class="legend-dot planned"></span>尚未開始</span>
+    </div>
+
+    <div class="tree-layout">
+      <div class="tree-card">
+        <div class="tree-head">
+          <div><strong>整體專題樹</strong><small>箭頭表示研究依賴或先後關係；「＋／－」可展開與收合子樹。</small></div>
+          <small id="treeCount" aria-live="polite"></small>
+        </div>
+        <div class="tree-viewport" id="treeViewport">
+          <svg id="treeSvg" role="img" aria-label="ATAXX 專題研究樹狀圖"></svg>
+        </div>
+        <div class="tree-caption">主研究鏈使用較粗的依賴箭頭；基礎設施、資料紀律與延伸研究則作為支援分支。點擊節點可查看精確指標與研究意義。</div>
+      </div>
+
+      <aside class="detail-panel" id="detailPanel" aria-live="polite">
+        <span class="detail-status active">目前節點</span>
+        <h2>V4-06 Conversion-Swing / Cascade</h2>
+        <p>點擊左側任一節點可查看詳細內容。預設顯示目前正在進行的 V4-06。</p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">ATAXX-VarBench · 本頁為研究結構與進度視覺化；正式證據仍以 private repository 的 protocol、artifact、validator 與 experiment log 為準。</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  const STATUS = {
+    done: {label:'已驗證完成', stroke:'#16a34a', fill:'#dcfce7', text:'#166534'},
+    weak: {label:'已完成 · WEAK', stroke:'#d97706', fill:'#fef3c7', text:'#92400e'},
+    active: {label:'進行中 / 未驗證', stroke:'#2563eb', fill:'#dbeafe', text:'#1d4ed8'},
+    blocked: {label:'Blocked', stroke:'#dc2626', fill:'#fee2e2', text:'#991b1b'},
+    planned: {label:'Planned', stroke:'#6b7280', fill:'#f3f4f6', text:'#4b5563'}
+  };
+
+  const tree = {
+    id:'root', title:'ATAXX 專題', subtitle:'Volatility-Aware Adaptive Selective Search', status:'active', kind:'root',
+    description:'研究核心是理解搜尋深度增加時最佳走法為何不穩定，並把額外搜尋成本只配置到需要的局面或分支。2026-08-27 起進一步收斂到 Ataxx 特有的大量棋子 conversion dynamics。',
+    metrics:[['主線','Search Instability → Volatility Detection → Selective Deepening'],['目前階段','V4-06 Ataxx Conversion-Swing / Cascade']],
+    children:[
+      {
+        id:'foundation', title:'研究基礎', subtitle:'Engine · Rules · Reproducibility', status:'done', kind:'support',
+        description:'所有正式實驗的可信基礎。主研究使用標準 7×7、無障礙 Ataxx 與固定深度 Alpha-Beta；d6 是較深 reference，不宣稱為 ground truth。',
+        children:[
+          {id:'engine',title:'核心引擎與搜尋',subtitle:'Fixed-depth Alpha-Beta',status:'done',kind:'support',description:'E0 驗證搜尋流程與記錄語義，後續 V3/V4 正式研究以彼此獨立的 d2/d4/d6 search calls 為基礎。',metrics:[['主 baseline','Fixed-depth Alpha-Beta'],['Reference','d6（較深搜尋，不等於 perfect play）']]},
+          {id:'board',title:'正式棋盤範圍',subtitle:'7×7 · 0 obstacles',status:'done',kind:'support',description:'主研究固定標準 7×7 Ataxx、無障礙，以避免 topology/board-size 成為混淆變因。'},
+          {id:'repro',title:'可重現資料鏈',subtitle:'Seed → Raw → Analysis → Conclusion',status:'done',kind:'support',description:'研究遵守 code → raw data → analysis → conclusion。development / held-out / fresh 資料必須分離，失敗實驗保留。'},
+          {id:'viewer',title:'Viewer / Seed Pipeline',subtitle:'唯讀展示與可重現 seed',status:'done',kind:'support',description:'公開 Viewer 用於文件、正式結果與對局展示；正式計算仍由 private C++ repository 執行。'}
+        ]
+      },
+      {
+        id:'research', title:'核心研究鏈', subtitle:'現象 → 偵測 → 資源分配', status:'active', kind:'main',
+        description:'這是專題的主要因果與實驗先後鏈。每一階段都由前一階段的結果導出下一個研究問題。',
+        children:[
+          {
+            id:'v302', title:'V3-02 Search Instability', subtitle:'先確認現象是否存在', status:'done', kind:'main',
+            description:'比較 d4 與 d6 的最佳走法，量化淺搜與較深搜尋之間的決策不穩定。',
+            metrics:[['樣本','3,000 states'],['d4→d6 disagreement','34.6333%']],
+            children:[
+              {
+                id:'v303', title:'V3-03 Volatility Detection', subtitle:'不穩定是否可被便宜訊號預測？', status:'done', kind:'main',
+                description:'使用盤面與淺搜特徵預測 d4→d6 instability。結果顯示 instability 並非純雜訊，但可預測性有限。',
+                metrics:[['ROC AUC','0.7183'],['PR AUC','0.5301']],
+                children:[
+                  {
+                    id:'v401', title:'V4-01 Position-Level SD', subtitle:'只對部分局面 d4→d6', status:'done', kind:'main',
+                    description:'用 locked volatility detector 決定哪些 eligible position 額外加深。證明 selective deepening 可以優於固定 d4，同時遠低於固定 d6 成本。',
+                    metrics:[['PSV vs P4','59.0% score rate'],['PSV vs P6','21.0% score rate'],['PSV / P6 nodes','13.37%'],['Trigger yield','67.87%']],
+                    children:[
+                      {
+                        id:'v402', title:'V4-02 Missed-State Diagnosis', subtitle:'為何仍遠弱於 d6？', status:'done', kind:'main',
+                        description:'Offline d6 replay 將 eligible states 分成 useful / unnecessary / saved / missed。主要瓶頸不是浪費加深，而是漏掉太多真正 unstable states。',
+                        metrics:[['Eligible','2,336'],['Observed instability','48.84%'],['Recall','32.95%'],['Missed','765']],
+                        children:[
+                          {
+                            id:'v403', title:'V4-03 Branch-Level Feasibility', subtitle:'d6 target 還在 shallow Top-K 嗎？', status:'done', kind:'main',
+                            description:'在 missed-instability states 中檢查 eventual d6-best branch 是否仍保留在 d4 ranking 前段。結果支持 branch-level allocation 的可行性。',
+                            metrics:[['d4 rank≤3 coverage','72.81%'],['d4 rank≤5 coverage','83.27%']],
+                            children:[
+                              {
+                                id:'v404', title:'V4-04 Root-Level Ranking', subtitle:'Generic shallow branch features', status:'weak', kind:'main',
+                                description:'嘗試只用 root branch 的 shallow-search / board-context features 排出值得加深的 branch；held-out Top-3 未勝過簡單 baseline。',
+                                metrics:[['M1 Top-3','42.31%'],['B2 baseline Top-3','48.08%'],['Gate','WEAK']],
+                                children:[
+                                  {
+                                    id:'v405', title:'V4-05 Reply-Level Volatility', subtitle:'加入 opponent-reply dynamics', status:'weak', kind:'main',
+                                    description:'reply profiling 成本低，但 frozen learned selector 在 fresh missed-instability Top-3 仍未優於 simple R0。這個 negative result 促使研究回到 Ataxx 特有機制。',
+                                    metrics:[['R0 fresh Top-3','50.73%'],['R1 fresh Top-3','49.13%'],['R1 Top-1','10.06%'],['Median profiling cost','14.82% of d6'],['Fresh gate','WEAK']],
+                                    children:[
+                                      {
+                                        id:'v406', title:'V4-06 Conversion-Swing / Cascade', subtitle:'Ataxx-specific mechanism analysis', status:'active', kind:'main',
+                                        description:'目前主工作。研究 Ataxx 一手可同時轉換多顆棋子的特性，測試 conversion / counter-conversion / cascade 是否真正與 d4→d6 search instability 有穩定關係。先研究 mechanism，不先訓練新 classifier。',
+                                        metrics:[['Primary hypothesis','higher conversion-cascade potential → higher P(instability)'],['Development seeds','202608250001–202608250100'],['Reserved fresh','202608250101–202608250150']],
+                                        children:[
+                                          {
+                                            id:'v406-metrics', title:'Ataxx-specific Metrics', subtitle:'I · C · S · B · Hotspot · Cascade', status:'active', kind:'current',
+                                            description:'待實作的核心指標：Immediate Conversion I(m)、Counter-Conversion Exposure C(m)、Conversion Swing S=I+C、Conversion Balance B=I−C、Maximum Infection Hotspot、Conversion Cascade。',
+                                            metrics:[['Jump material swing','ΔD = 2k'],['Clone material swing','ΔD = 1 + 2k']]
+                                          },
+                                          {
+                                            id:'v406-workflow', title:'V4-06 Workflow', subtitle:'PLAN → INIT → IMPLEMENT → SMOKE → FORMAL', status:'active', kind:'workflow',
+                                            description:'V4-06 採嚴格 stage gate。Smoke 未 PASS 前不可正式 development；conversion rule 未 freeze 前不可使用 reserved fresh set。',
+                                            children:[
+                                              {id:'plan',title:'PLAN',subtitle:'問題與 protocol',status:'done',kind:'workflow',description:'研究問題、V4-06 direction 與 protocol spec 已建立。'},
+                                              {id:'init',title:'INIT',subtitle:'Preflight workflow',status:'active',kind:'workflow',description:'Workflow 已建置，但尚未實際 PASS。'},
+                                              {id:'implement',title:'IMPLEMENT',subtitle:'目前工作',status:'active',kind:'workflow',description:'實作 conversion metric、formal analysis 與 validator。'},
+                                              {id:'smoke',title:'SMOKE',subtitle:'等待 implementation',status:'blocked',kind:'workflow',description:'只有 conversion metric implementation 完成後才能做小規模語意驗證。'},
+                                              {id:'devformal',title:'FORMAL Development',subtitle:'等待 SMOKE PASS',status:'blocked',kind:'workflow',description:'正式 development analysis 必須在 smoke PASS 後執行。'},
+                                              {id:'analyze',title:'ANALYZE',subtitle:'Risk buckets vs P(d4≠d6)',status:'planned',kind:'workflow',description:'檢查 effect size、bucket monotonicity、樣本數與 confidence interval。'},
+                                              {id:'freeze',title:'FREEZE',subtitle:'凍結可解釋 conversion rule',status:'planned',kind:'workflow',description:'若 development 發現穩定訊號，必須先凍結 rule 才能碰 fresh set。'},
+                                              {id:'fresh',title:'FORMAL Fresh',subtitle:'Seeds 101–150',status:'planned',kind:'workflow',description:'fresh confirmation 僅做 confirmatory evaluation，不允許 retuning。'},
+                                              {id:'document',title:'DOCUMENT',subtitle:'正式結論與結果頁',status:'planned',kind:'workflow',description:'將 mechanism 與 selective deepening 意義寫入正式報告與 viewer。'}
+                                            ]
+                                          },
+                                          {
+                                            id:'v407', title:'V4-07 Conversion-Aware SD', subtitle:'Conditional on V4-06', status:'planned', kind:'main',
+                                            description:'只有 V4-06 證明 conversion-aware signal 與 instability 有穩定關係後才進行。目標是把額外 search budget 配置給真正 tactical 的 Ataxx branches。'
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id:'data', title:'資料與證據紀律', subtitle:'Development · Held-out · Fresh', status:'done', kind:'support',
+        description:'避免資料洩漏與 post-hoc tuning 是整個專題可信度的重要部分。',
+        children:[
+          {id:'devdata',title:'Development',subtitle:'Seeds 001–100',status:'done',kind:'support',description:'V4-06 retrospective development 可用 seeds 001–100；其中 051–100 已被 V4-05 消耗，因此不能再稱為 fresh。'},
+          {id:'freshdata',title:'Reserved Fresh',subtitle:'Seeds 101–150',status:'planned',kind:'support',description:'專門保留給 V4-06 frozen rule 的 fresh confirmation；在 freeze 之前不得用於 tuning。'},
+          {id:'evidence',title:'Evidence Chain',subtitle:'code → raw → analysis → conclusion',status:'done',kind:'support',description:'每個正式結果必須能回溯到 code、raw artifact、analysis 與 validator；失敗與 WEAK 結果不得刪除。'},
+          {id:'logs',title:'SSOT / Experiment Log',subtitle:'PROJECT_STATUS + experiment_log',status:'done',kind:'support',description:'PROJECT_STATUS.md 是目前進度 SSOT；docs/experiment_log.md 保存正式、預備與失敗實驗。'}
+        ]
+      },
+      {
+        id:'extensions', title:'延伸研究', subtitle:'不屬於目前主線', status:'planned', kind:'support',
+        description:'保留作完成核心主線後的外部效度與變體研究，不與目前 V4-06 主實驗混用。',
+        children:[
+          {id:'nxn',title:'N×N Board',subtitle:'棋盤尺寸變化',status:'planned',kind:'support',description:'研究 board size 對 instability / conversion dynamics 的影響。'},
+          {id:'obstacles',title:'Obstacle / Topology',subtitle:'Procedural Level Generator',status:'planned',kind:'support',description:'研究障礙與 topology 是否改變 volatility 與 selective deepening 效果。'},
+          {id:'othello',title:'Othello Cross-Game',subtitle:'外部驗證',status:'planned',kind:'support',description:'可作跨遊戲比較，但不是目前 Ataxx 主線。'}
+        ]
+      }
+    ]
+  };
+
+  const svg = document.getElementById('treeSvg');
+  const viewport = document.getElementById('treeViewport');
+  const detailPanel = document.getElementById('detailPanel');
+  const searchInput = document.getElementById('treeSearch');
+  const statusFilter = document.getElementById('statusFilter');
+  const treeCount = document.getElementById('treeCount');
+  const collapsed = new Set(['foundation','data','extensions','v406-workflow']);
+  let selectedId = 'v406';
+
+  const flat = new Map();
+  const parent = new Map();
+  (function index(node, p=null){
+    flat.set(node.id,node);
+    if(p) parent.set(node.id,p.id);
+    (node.children||[]).forEach(c=>index(c,node));
+  })(tree);
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+  function statusMatches(node){
+    const f=statusFilter.value;
+    return f==='all' || node.status===f;
+  }
+
+  function queryMatches(node){
+    const q=searchInput.value.trim().toLowerCase();
+    if(!q) return true;
+    const hay=[node.id,node.title,node.subtitle,node.description,...(node.metrics||[]).flat()].join(' ').toLowerCase();
+    return hay.includes(q);
+  }
+
+  function visibleChildren(node){
+    if(collapsed.has(node.id)) return [];
+    return node.children||[];
+  }
+
+  function collectVisible(node, depth=0, out=[]){
+    out.push({node,depth});
+    visibleChildren(node).forEach(c=>collectVisible(c,depth+1,out));
+    return out;
+  }
+
+  function leafUnits(node){
+    const kids=visibleChildren(node);
+    if(!kids.length) return 1;
+    return kids.reduce((sum,c)=>sum+leafUnits(c),0);
+  }
+
+  function layoutTree(){
+    const nodeW=218, nodeH=98, gapX=34, gapY=72;
+    let leafCursor=0;
+    const positions=new Map();
+
+    function walk(node, depth){
+      const kids=visibleChildren(node);
+      let x;
+      if(!kids.length){
+        x=leafCursor*(nodeW+gapX);
+        leafCursor+=1;
+      }else{
+        const childXs=kids.map(c=>walk(c,depth+1));
+        x=(childXs[0]+childXs[childXs.length-1])/2;
+      }
+      const y=depth*(nodeH+gapY);
+      positions.set(node.id,{x,y,node});
+      return x;
+    }
+    walk(tree,0);
+
+    let maxX=0,maxY=0;
+    positions.forEach(p=>{maxX=Math.max(maxX,p.x+nodeW);maxY=Math.max(maxY,p.y+nodeH);});
+    return {positions,nodeW,nodeH,width:Math.max(maxX+50,viewport.clientWidth-2),height:maxY+70};
+  }
+
+  function nodeClass(node){
+    const q=searchInput.value.trim();
+    const filter=statusFilter.value;
+    let cls='node-hit';
+    if(q && queryMatches(node)) cls+=' search-hit';
+    if((q && !queryMatches(node)) || (filter!=='all' && !statusMatches(node))) cls+=' search-dim';
+    if(node.id===selectedId) cls+=' selected';
+    return cls;
+  }
+
+  function render(){
+    const {positions,nodeW,nodeH,width,height}=layoutTree();
+    svg.setAttribute('viewBox',`-25 -25 ${width+50} ${height+50}`);
+    svg.setAttribute('width',width+50);
+    svg.setAttribute('height',height+50);
+    svg.innerHTML='';
+
+    const ns='http://www.w3.org/2000/svg';
+    const defs=document.createElementNS(ns,'defs');
+    const marker=document.createElementNS(ns,'marker');
+    marker.setAttribute('id','arrow');marker.setAttribute('viewBox','0 0 10 10');marker.setAttribute('refX','9');marker.setAttribute('refY','5');marker.setAttribute('markerWidth','7');marker.setAttribute('markerHeight','7');marker.setAttribute('orient','auto-start-reverse');
+    const path=document.createElementNS(ns,'path');path.setAttribute('d','M 0 0 L 10 5 L 0 10 z');path.setAttribute('fill','#8fa0b8');marker.appendChild(path);defs.appendChild(marker);svg.appendChild(defs);
+
+    positions.forEach(({node})=>{
+      visibleChildren(node).forEach(child=>{
+        const a=positions.get(node.id), b=positions.get(child.id);
+        if(!a||!b) return;
+        const edge=document.createElementNS(ns,'path');
+        const x1=a.x+nodeW/2, y1=a.y+nodeH, x2=b.x+nodeW/2, y2=b.y;
+        const mid=(y1+y2)/2;
+        edge.setAttribute('d',`M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2-7}`);
+        edge.setAttribute('fill','none');
+        edge.setAttribute('stroke',node.kind==='main' || child.kind==='main' ? '#8190a8' : '#b7c1cf');
+        edge.setAttribute('stroke-width',node.kind==='main' || child.kind==='main' ? '2.4' : '1.6');
+        edge.setAttribute('marker-end','url(#arrow)');
+        svg.appendChild(edge);
+      });
+    });
+
+    positions.forEach(({x,y,node})=>{
+      const st=STATUS[node.status]||STATUS.planned;
+      const g=document.createElementNS(ns,'g');
+      g.setAttribute('class',nodeClass(node));
+      g.setAttribute('transform',`translate(${x},${y})`);
+      g.setAttribute('tabindex','0');
+      g.setAttribute('role','button');
+      g.setAttribute('aria-label',`${node.title}，${st.label}`);
+
+      const rect=document.createElementNS(ns,'rect');
+      rect.setAttribute('class','node-frame');rect.setAttribute('x','0');rect.setAttribute('y','0');rect.setAttribute('rx','15');rect.setAttribute('width',nodeW);rect.setAttribute('height',nodeH);rect.setAttribute('fill',st.fill);rect.setAttribute('stroke',st.stroke);rect.setAttribute('stroke-width',node.id===selectedId?'4':'2');
+      g.appendChild(rect);
+
+      const stripe=document.createElementNS(ns,'rect');stripe.setAttribute('x','0');stripe.setAttribute('y','0');stripe.setAttribute('rx','15');stripe.setAttribute('width','8');stripe.setAttribute('height',nodeH);stripe.setAttribute('fill',st.stroke);g.appendChild(stripe);
+
+      const title=document.createElementNS(ns,'text');title.setAttribute('x','17');title.setAttribute('y','29');title.setAttribute('class','node-title');title.setAttribute('font-size','14');title.textContent=node.title;g.appendChild(title);
+      const sub=document.createElementNS(ns,'text');sub.setAttribute('x','17');sub.setAttribute('y','50');sub.setAttribute('class','node-subtitle');sub.setAttribute('font-size','11.5');
+      const clipped=(node.subtitle||'').length>31?(node.subtitle||'').slice(0,30)+'…':(node.subtitle||'');sub.textContent=clipped;g.appendChild(sub);
+      const meta=document.createElementNS(ns,'text');meta.setAttribute('x','17');meta.setAttribute('y','76');meta.setAttribute('class','node-meta');meta.setAttribute('font-size','10.5');meta.textContent=st.label;g.appendChild(meta);
+
+      const kids=node.children||[];
+      if(kids.length){
+        const tg=document.createElementNS(ns,'g');tg.setAttribute('class','node-toggle');tg.setAttribute('transform',`translate(${nodeW-28},${nodeH-28})`);tg.setAttribute('role','button');tg.setAttribute('aria-label',collapsed.has(node.id)?'展開子樹':'收合子樹');
+        const c=document.createElementNS(ns,'circle');c.setAttribute('cx','12');c.setAttribute('cy','12');c.setAttribute('r','10');c.setAttribute('fill','#fff');c.setAttribute('stroke',st.stroke);c.setAttribute('stroke-width','1.5');tg.appendChild(c);
+        const t=document.createElementNS(ns,'text');t.setAttribute('x','12');t.setAttribute('y','16');t.setAttribute('text-anchor','middle');t.setAttribute('font-size','15');t.textContent=collapsed.has(node.id)?'+':'−';tg.appendChild(t);
+        tg.addEventListener('click',e=>{e.stopPropagation();collapsed.has(node.id)?collapsed.delete(node.id):collapsed.add(node.id);render();});
+        g.appendChild(tg);
+      }
+
+      const choose=()=>selectNode(node.id,true);
+      g.addEventListener('click',choose);
+      g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}});
+      svg.appendChild(g);
+    });
+
+    const visible=collectVisible(tree);
+    treeCount.textContent=`顯示 ${visible.length} / ${flat.size} 個節點`;
+  }
+
+  function selectNode(id,scrollPanel=false){
+    const node=flat.get(id);if(!node)return;
+    selectedId=id;
+    const st=STATUS[node.status]||STATUS.planned;
+    const metrics=(node.metrics||[]).map(([k,v])=>`<div class="metric"><strong>${esc(v)}</strong><span>${esc(k)}</span></div>`).join('');
+    const kids=node.children||[];
+    detailPanel.innerHTML=`
+      <span class="detail-status ${esc(node.status)}">${esc(st.label)}</span>
+      <h2>${esc(node.title)}</h2>
+      <div class="meta">${esc(node.id)} · ${esc(node.subtitle||'')}</div>
+      <p>${esc(node.description||'尚無補充說明。')}</p>
+      ${metrics?`<h3>關鍵指標</h3><div class="metric-list">${metrics}</div>`:''}
+      ${kids.length?`<h3>直接子節點</h3><ul>${kids.map(k=>`<li>${esc(k.title)} <small>— ${esc(STATUS[k.status].label)}</small></li>`).join('')}</ul>`:''}
+      ${node.id==='v406'?'<div class="notice" style="margin-top:16px"><strong>目前工作：</strong>先實作 conversion metrics，Smoke PASS 後才可跑 formal development。</div>':''}
+    `;
+    render();
+    if(scrollPanel && window.matchMedia('(max-width:980px)').matches){detailPanel.scrollIntoView({behavior:'smooth',block:'start'});}
+  }
+
+  function revealPath(id){
+    let cur=id;
+    while(parent.has(cur)){
+      const p=parent.get(cur);collapsed.delete(p);cur=p;
+    }
+  }
+
+  document.getElementById('expandAll').addEventListener('click',()=>{collapsed.clear();render();});
+  document.getElementById('collapseSupport').addEventListener('click',()=>{['foundation','data','extensions','v406-workflow'].forEach(id=>collapsed.add(id));render();});
+  document.getElementById('focusCurrent').addEventListener('click',()=>{
+    revealPath('v406');selectNode('v406');
+    requestAnimationFrame(()=>{
+      const el=svg.querySelector('.selected');
+      if(el){const bb=el.getBBox();viewport.scrollTo({left:Math.max(0,bb.x-viewport.clientWidth/2+bb.width/2),top:Math.max(0,bb.y-120),behavior:'smooth'});}
+    });
+  });
+  searchInput.addEventListener('input',render);
+  statusFilter.addEventListener('change',render);
+  window.addEventListener('resize',()=>{clearTimeout(window.__treeResize);window.__treeResize=setTimeout(render,120);});
+
+  revealPath('v406');
+  selectNode('v406');
+})();
+</script>
+</body>
+</html>
