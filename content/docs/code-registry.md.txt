@@ -30,13 +30,13 @@
 |---|---|---|
 | `ataxx` / `src/main.cpp` | utility-current | CLI board/layout smoke/demo；不是研究 runner |
 | `ataxx_seed_runner` / `src/seed_runner.cpp` | utility-current | Seed Spec v3 generate/run；v2 historical replay compatibility |
-| `ataxx_search_probe` / `src/search_probe.cpp` | utility-current | Seed-based d2/d3/d4 diagnostic probe |
+| `ataxx_search_probe` / `src/search_probe.cpp` | utility-current | Seed-based diagnostic probe |
 | `ataxx_volatility_positions` / `src/volatility_positions.cpp` | experiment-frozen | V3-02 authoritative frozen-position sampler |
 | `ataxx_volatility_shard` / `src/volatility_shard.cpp` | experiment-frozen | V3-02 authoritative d2/d4/d6 shard evaluator |
 | `ataxx_v4_opening_freezer` / `src/v4_opening_freezer.cpp` | experiment-frozen | V4-01 frozen opening generation |
 | `ataxx_v4_policy_game` / `src/v4_policy_runner.cpp` | experiment-frozen | V4-01 PSV-20/P4/P6 runner；future changes require schema/protocol bump |
 | `ataxx_search_data` / `src/search_data.cpp` | legacy-pilot | Early random search-instability sampler |
-| `ataxx_volatility_data` / `src/volatility_data.cpp` | legacy-pilot | Older monolithic V3 dataset collector; superseded by frozen-position + parallel shards |
+| `ataxx_volatility_data` / `src/volatility_data.cpp` | legacy-pilot | Older monolithic V3 dataset collector |
 
 ## Python analysis / validation
 
@@ -51,36 +51,38 @@
 | `tools/validate_v4_01_formal_primary.py` | experiment-frozen | V4 formal-result validator |
 | `tools/validate_volatility_dataset.py` | utility-current | V3-format dataset validation |
 | `tools/merge_volatility_shards.py` | experiment-frozen | V3-02 parallel shard merge |
-| `tools/validate_project_spec.py` | utility-current | Cross-file spec/version drift guard |
+| `tools/validate_project_spec.py` | utility-current | Cross-file spec/version/workflow drift guard |
+| `tools/v4_06_conversion_common.py` | utility-current | V4-06 schema-v2 conversion feature semantics |
+| `tools/v4_06_conversion_smoke.py` | utility-current | deterministic hand-checked V4-06 smoke cases |
+| `tools/v4_06_conversion_formal.py` | utility-current | V4-06 development/future fresh analysis runner |
+| `tools/validate_v4_06_conversion.py` | utility-current | V4-06 feature/output identity validator |
 
 ## GitHub Actions
 
-### Current
+### Active workflows
+
+The active workflow list is machine-registered in `spec/project_spec.json`. `tools/validate_project_spec.py` fails CI if this table and `.github/workflows/*.yml` drift.
 
 | Workflow | Status | Purpose |
 |---|---|---|
-| `.github/workflows/ci.yml` | authoritative-current | Build + regression + spec validation |
-| `.github/workflows/run-seed-batch.yml` | utility-current | Generate/persist viewer runs |
-| `.github/workflows/search-probe-smoke.yml` | utility-current | Probe pipeline smoke |
-| `.github/workflows/run-volatility-probe-batch.yml` | utility-current | Historical/diagnostic probe batch |
-| `.github/workflows/analyze-volatility-probe.yml` | utility-current | Probe analysis |
-| `.github/workflows/run-formal-volatility-parallel.yml` | experiment-frozen | **Authoritative V3-02 formal dataset pipeline** |
-| `.github/workflows/v3-03-detector-validation.yml` | experiment-frozen | V3-03 model selection/validation |
-| `.github/workflows/run-v3-03-locked-test.yml` | experiment-frozen | V3-03 locked test |
-| `.github/workflows/v4-01-derive-thresholds.yml` | experiment-frozen | V4 threshold derivation |
-| `.github/workflows/v4-01-fixed-threshold-sanity.yml` | experiment-frozen | V4 locked-test fixed-threshold sanity |
-| `.github/workflows/v4-01-freeze-openings.yml` | experiment-frozen | V4 opening freeze |
-| `.github/workflows/v4-01-smoke.yml` | experiment-frozen | V4 smoke |
-| `.github/workflows/v4-01-formal-primary.yml` | experiment-frozen | V4 200-game formal primary |
+| `.github/workflows/ci.yml` | authoritative-current | Build + regression + global spec validation |
+| `.github/workflows/run-seed-batch.yml` | utility-current | Generate/persist Viewer runs |
+| `.github/workflows/v4-06-init.yml` | utility-current | V4-06 preflight / protocol readiness |
+| `.github/workflows/v4-06-smoke.yml` | utility-current | V4-06 deterministic smoke verification |
+| `.github/workflows/v4-06-formal.yml` | utility-current | V4-06 machine-gated development/fresh analysis |
 
-### Superseded / archived
+No other workflow is currently triggerable from `.github/workflows/`.
 
-| Historical workflow | Status | Reason |
-|---|---|---|
-| `archive/workflows/run-formal-volatility-dataset.yml` | legacy-pilot | Monolithic V3 formal collector superseded by parallel frozen-position pipeline |
-| `archive/workflows/v4-01-patch-decision-logging.yml` | one-time-archive | One-time runner logging migration already applied |
+### Historical / archived workflow policy
 
-The archived copies are documentary provenance only and intentionally live outside `.github/workflows/`, so GitHub Actions cannot trigger them.
+Completed V3/V4 one-shot workflows have been removed from the active workflow directory. Their historical commits, frozen source code, formal result directories, experiment-log records and run/artifact identifiers remain the provenance record. Archived copies, where retained under `archive/`, are documentary only and must not be reactivated without a new protocol/version review.
+
+## V4-06 gate rules
+
+- `FORMAL` reruns a deterministic smoke + validator in the same job before development analysis; mere file existence is not accepted as verification.
+- Fresh confirmation cannot be enabled by a manual checkbox. It requires `spec/v4_06_frozen_rule.json` plus a matching SHA-256 registered in `spec/project_spec.json`.
+- Reserved seeds `202608250101–202608250150` remain blocked until an authoritative validated replay source is generated and wired.
+- Formal Actions artifacts are transport copies. Verified evidence must ultimately be committed/archived under `results/v4_06/` with hashes and source provenance before V4-06 can be called verified-complete.
 
 ## Maintenance rule
 
@@ -89,4 +91,5 @@ Before using an executable for a new formal experiment:
 1. confirm its registry status is `authoritative-current` / `utility-current`, or intentionally fork an `experiment-frozen` runner into a new version;
 2. record the runner commit and output schema version;
 3. run build/test/validator;
-4. do not reuse a `legacy-pilot` or archived workflow merely because it still compiles.
+4. do not reuse a `legacy-pilot` or archived workflow merely because it still compiles;
+5. if the active workflow set changes, update `spec/project_spec.json` and this registry in the same change series.
