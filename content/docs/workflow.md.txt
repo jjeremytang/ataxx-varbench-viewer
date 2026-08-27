@@ -11,6 +11,7 @@
 - 一次只處理一個主要 Current Task。
 - 前一階段未驗證完成，不直接進入下一階段。
 - 大量實驗前先做小規模 smoke test。
+- 若 protocol / feature semantics / statistical interpretation 發生 semantic change，舊版 smoke 或 formal gate 不得沿用；必須針對新版本重新 VERIFY。
 
 ## 2. 分工
 
@@ -32,34 +33,28 @@
 
 ## 3. 每次開始工作
 
-開始前先確認：
-
-- Current Phase
-- Current Task
-- Status
-- Completion Criteria
-- Next
+開始前先確認：Current Phase、Current Task、Status、Completion Criteria、Next。
 
 研究者說「繼續」時，原則上繼續目前 Current Task，不另開新支線。
 
 ## 4. 完成狀態
 
 - **未完成**：尚未執行、正在執行或執行失敗。
-- **已修改、未驗證**：程式或 GitHub 已修改，但尚未經過 build/test/validator。
-- **已驗證完成**：程式、workflow 或資料已實際驗證通過。
+- **已修改、未驗證**：程式、規格或 GitHub 已修改，但尚未通過該版本要求的 build/test/validator/smoke。
+- **已驗證完成**：程式、workflow 或資料已實際驗證通過，而且必要 evidence chain 已保存。
 
-不得把「已寫程式」描述成「已完成」。
+不得把「已寫程式」「workflow 檔案存在」「曾經有舊版 smoke PASS」描述成目前版本已完成。
 
 ## 5. 規格與 GitHub 權威來源
 
 - `SPEC.md`：目前全域語義／版本規格。
-- task-specific frozen protocol：已完成正式實驗的不可回寫條件。
-- `spec/project_spec.json`：可由 CI 驗證的規格常數與 artifact provenance。
+- task-specific frozen protocol：正式實驗的實驗條件與分析語義。
+- `spec/project_spec.json`：可由 CI 驗證的規格常數、active workflow set 與 artifact provenance。
 - `PROJECT_STATUS.md`：唯一正式即時進度來源。
 - `docs/code_registry.md`：程式／workflow 的 current / frozen / legacy 分級。
 - README、PROJECT.md、logs 不重複維護 Current Task 或 runtime constants。
 
-每完成重要工作，同步更新 `PROJECT_STATUS.md`。新對話開始時，先讀 `PROJECT_STATUS.md`，涉及語義或版本時再讀 `SPEC.md`。
+每完成重要工作，同步更新 `PROJECT_STATUS.md`。新對話開始時，先讀 `PROJECT_STATUS.md`，涉及語義或版本時再讀 `SPEC.md` 與 task protocol。
 
 ## 6. 資料分類
 
@@ -69,43 +64,51 @@
 - `derived`：由原始資料計算出的統計與衍生資料。
 - `diagnostics`：workflow、validator、smoke test 等工程診斷資料。
 
-不同用途、不同版本的資料不得混用。
+不同用途、不同版本的資料不得混用。development / held-out / fresh 的角色必須在 protocol 中明確標示，fresh 不得因結果不理想而被重新定義或回收調參。
 
 ## 7. Semantic change control
 
-以下變更視為 **semantic change**：
-
-- 遊戲規則／終局／repetition semantics；
-- legal-move ordering 或 best-move tie-breaking；
-- evaluation function / Alpha-Beta semantics；
-- detector feature / preprocessing / coefficient / applicability domain；
-- threshold / gating policy；
-- sampling distribution / opening generation；
-- formal output interpretation。
+以下變更視為 semantic change：遊戲規則／終局／repetition、legal-move ordering / tie-breaking、evaluation/search semantics、detector feature/preprocessing/coefficient/domain、threshold/gating、sampling/opening generation、feature definition/branch aggregation/leakage boundary、confidence interval/bootstrap unit/primary cohort/formal interpretation。
 
 Semantic change 必須：
 
 1. PLAN 說明變更原因；
 2. IMPLEMENT 使用新 implementation/schema/protocol version；
 3. VERIFY build/test/parity/validator；
-4. 必要時重新 smoke；
+4. 重新 smoke（若影響正式分析或 runner）；
 5. 之後才能 RUN 新正式資料。
 
-已完成的 frozen raw artifact 不得為了「補新欄位」直接覆寫。需要補充時，另建 derived manifest / analysis。
+已完成 frozen raw artifact 不得直接覆寫補欄位；補充內容另建 derived manifest / analysis。
 
-## 8. Program status gate
+## 8. Program / workflow status gate
 
-正式執行前需查 `docs/code_registry.md`：
+正式執行前需查 `docs/code_registry.md`。Active workflow set 必須與 `spec/project_spec.json` 一致並由 CI 檢查 drift。
 
-- `authoritative-current` / `utility-current`：可在符合 protocol 的情況下使用；
-- `experiment-frozen`：重現舊實驗可使用；若要改，需 fork 新版本；
-- `legacy-pilot`：不得用於新的正式 claim；
-- `one-time-archive`：不得重新啟用為日常 workflow。
+重要 formal workflow 的前置驗證應 machine-enforced in the same job/run，例如：global spec validator → deterministic smoke → task validator → source identity/provenance check → formal analysis。不得只以檔案存在或手動宣稱 PASS 作為 formal gate。
 
-## 9. 核心原則
+## 9. Freeze / fresh confirmation rule
+
+若 development 後要凍結 threshold、composite score、selector 或 decision rule，fresh confirmation 前必須留下 machine-readable frozen rule，至少包含 rule/model identifier、feature/schema version、development provenance、primary metric/decision rule、threshold/固定參數、freeze commit、SHA-256。
+
+Fresh workflow 必須驗證 frozen rule hash 與 registry 一致。Checkbox 或文字確認不能取代 hash-locked freeze。
+
+## 10. Formal evidence archival
+
+GitHub Actions artifact 是 transport / execution artifact，不是唯一長期研究證據。
+
+Formal task 標記已驗證完成前，接受版本的核心證據應保存到 `results/<task>/` 或 protocol 指定永久路徑，至少包含 result/reference、analysis summary、validation manifest、source/provenance manifest、source commit、schema/protocol version、SHA-256；fresh confirmation 另附 frozen-rule hash 與 fresh source provenance。
+
+## 11. 統計與資料相依性
+
+同一 opening/game/seed 產生多個 positions 時，不應默認每列獨立。若結論依賴 CI/resampling，protocol 必須指定適當 resampling unit 並固定 RNG seed / replicate count。
+
+若候選特徵可能與 ply/phase/board density 等共同變動，至少需要 stratified analysis 或預先定義 adjusted analysis，避免把 confounder 當成機制訊號。
+
+## 12. 核心原則
 
 - 先定義問題，再寫程式。
 - 先驗證程式，再跑大量資料。
 - 先確認資料，再做研究結論。
 - 每次實驗都應可重現、可追蹤、可驗證。
+- negative / WEAK result 不刪除，也不以無限 feature tuning 迴避。
 - 展示網站是 read-only presentation layer，不取代 private C++ engine / formal artifacts 的權威地位。
