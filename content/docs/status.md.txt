@@ -1,88 +1,108 @@
 # Project Status
 
-> 此檔案是 ATAXX 專題目前進度的唯一正式來源（Single Source of Truth）。全域語義／版本規格請看 `SPEC.md`；README、PROJECT.md 與 logs 不重複維護 Current Task。
+> ATAXX 專題目前進度唯一正式來源（SSOT）。全域規格看 `SPEC.md`；完整 protocol / results 看 `docs/`、`results/`、`spec/`。
+
+## Progress Tree
+
+### 狀態圖例
+
+- 🟢 **已驗證完成**：結果與證據鏈完整，可進入研究結論。
+- 🟡 **已驗證完成，但結果 WEAK**：實驗完成且有效，但假說未獲足夠支持。
+- 🔵 **目前進行中 / 已修改未驗證**：實作或規格已變更，等待對應驗證。
+- 🔴 **Blocked**：被前置條件阻擋，現在不可正式執行。
+- ⚪ **Planned**：尚未開始。
+
+```mermaid
+flowchart TD
+    V302["🟢 V3-02<br/>Search Instability<br/>d4→d6 disagreement 34.63%"]
+    V303["🟢 V3-03<br/>Volatility Detection<br/>ROC AUC 0.7183"]
+    V401["🟢 V4-01<br/>Position-Level Selective Deepening<br/>PSV vs P4 = 59.0%"]
+    V402["🟢 V4-02<br/>Missed-State Diagnosis<br/>主要瓶頸 = false negatives"]
+    V403["🟢 V4-03<br/>Branch-Level Feasibility<br/>d4 Top-5 coverage 83.27%"]
+    V404["🟡 V4-04<br/>Root-Level Branch Ranking<br/>WEAK"]
+    V405["🟡 V4-05<br/>Reply-Level Volatility<br/>Fresh gate = WEAK"]
+    V406["🔵 V4-06<br/>Conversion Mechanics<br/>schema v2 re-verification"]
+    V407["⚪ V4-07<br/>Conversion-Aware Selective Deepening<br/>conditional on V4-06"]
+
+    V302 --> V303 --> V401 --> V402 --> V403 --> V404 --> V405 --> V406
+    V406 -->|stable interpretable residual signal| V407
+```
 
 ## Current Phase
 
-Repository Standardization
+**V4-06 — Protocol-hardened implementation re-verification**
 
 ## Current Task
 
-規格統一＋程式版本一致性稽核＋靜態閱讀介面改造
+Verify the hardened V4-06 schema-v2 implementation before any new development formal run。
 
-## Status
+目前狀態：**已修改、未驗證**。
 
-**IMPLEMENT — 已修改、未驗證。**
+2026-08-27 protocol hardening 是 semantic/statistical change，因此先前 schema-v1 的 local/GitHub smoke 不能作為 schema-v2 的正式 gate。
 
-## Completion Criteria
+## V4-06 Protocol v2
 
-- 建立唯一全域規格來源 `SPEC.md` 與 machine-readable `spec/project_spec.json`。
-- 所有主要 C++ executable / Python tool / GitHub workflow 有 current / frozen / legacy 分級與用途紀錄。
-- 移除 active workflow 中已完成的一次性 patch 與被取代的 V3 monolithic formal pipeline，保留 archive provenance。
-- CI 固定使用 Release configure，並驗證 spec/artifact SHA 與 Seed Spec regression vectors。
-- 修正已發現的文件版本漂移，例如 Seed Spec v2/v3 與 Iterative Deepening 實作狀態。
-- public Viewer 與 private C++ Seed Spec 以相同 known vectors 驗證。
-- public Pages 改成 read-only 靜態研究入口：友善文件閱讀頁、程式碼 snapshot viewer、對局 viewer；公開 snapshot 明確標記來源 commit，不取代 private repo authority。
-- private README / docs navigation 改為清楚連到規格、結果、程式角色與公開閱讀介面。
-- 完成後 private CI 與 Viewer Pages/validation 均通過。
+Authoritative protocol：`spec/v4_06_conversion_analysis.json`  
+Feature semantics：`v4-06-features-2`
 
-## Standardization Audit Findings
+### Primary unit and leakage rule
 
-已確認：
+- state = validated oracle-replay eligible state；
+- primary root branch = `original_d4_move`；
+- outcome = `oracle_move_changed_4_6`；
+- d6-derived values may define retrospective outcome only；不得用來選 branch 或建立未來 online conversion rule。
 
-1. Viewer 實作已是 Seed Spec v3，但 public README 仍描述 v2。
-2. `PROJECT.md` 曾把 Iterative Deepening 寫成目前 baseline；實際 V3/V4 formal `SearchEngine` 為 fixed-depth Alpha-Beta。
-3. V3 locked detector preprocessing / logistic coefficients 被手動複製到 V4 C++ runner，現值未發現不符，但未來有 silent drift 風險。
-4. V4-01 per-game summary schema 沒直接保存所有 protocol-level provenance；V4-01 已由 run manifest / derived analysis 補齊，因此不影響既有結論，但 future schema 應升版。
-5. `v4-01-patch-decision-logging.yml` 是已完成的一次性 workflow，不應繼續 active。
-6. 舊 monolithic V3 dataset workflow 與 authoritative parallel frozen-position pipeline 並存，可能誤導後續重跑。
-7. Seed Spec C++ / JS 雙實作缺少共同 fixed-vector regression。
-8. Generic Linux CI 原先未在 configure 時指定 `CMAKE_BUILD_TYPE=Release`；formal workflows 本身有指定 Release，因此不影響已完成 V4 timing。
-9. `RULES.md` 與目前 core `Game` semantics 未發現版本不一致。
+### Metrics
 
-Audit record: `docs/standardization_audit_2026-08-25.md`  
-Code registry: `docs/code_registry.md`
+Conversion count metrics：`I(m)`、`C(m)`、`S(m)=I+C`、`B(m)=I-C`、Maximum Infection Hotspot、deterministic `k0+k1+k2` cascade。
 
-## Latest Verified Research
+Material metrics：`G0=2I+1[Clone]`、`G1`、`A2=G0+G1`、`N2=G0-G1`、`G0+G1+G2` cascade material amplitude。
 
-- `V4-01` position-level selective deepening formal primary experiment：**已驗證完成**。
-  - formal results: `docs/v4_01_formal_results.md`
-  - raw-result commit: `629337722514da0fc478a8804018b3b79b77497e`
-  - 50 frozen openings / 200 formal games / 15,485 move rows validated。
-  - `PSV-20 vs P4`: 56W / 6D / 38L，score rate **59.0%**，95% paired bootstrap CI **51.0%–67.0%**。
-  - `PSV-20 vs P6`: 18W / 6D / 76L，score rate **21.0%**，95% paired bootstrap CI **13.5%–29.0%**。
-  - PSV / P4 cost: **6.40× nodes**。
-  - PSV / P6 cost: **13.37% nodes**。
-  - 376 / 554 triggered d6 calls changed the d4 best move: **67.87%**。
-- `V3-03` locked detector：`M1_logistic_C_0.01`；locked test ROC-AUC / PR-AUC = 0.7183 / 0.5301。
-- `V3-02` formal dataset：3000 unique positions；dataset SHA-256 `752ab3caa88aa5b71e58364ff974f35aed45818fd6057c192ab4f843b815e928`。
+Conversion count 與 material swing 必須分開報告。
 
-## V4-01 Interpretation Boundary
+## Required Analysis
 
-正式數據支持：
+1. all eligible states；
+2. detector-negative residual cohort：`original_deepened=0`；
+3. pooled / early / mid / late；
+4. tie-preserving buckets；
+5. primary 95% CI = opening-seed clustered bootstrap，2000 replicates，RNG seed `20260827`；
+6. Wilson CI 只作 descriptive secondary interval。
 
-> 在標準 7×7 Ataxx 與 detector 訓練範圍 ply 6–30 內，volatility-aware position-level selective deepening 可提升相較 fixed d4 的棋力，同時使用遠少於 fixed d6 的搜尋成本。
+## Development / Fresh Boundary
 
-正式數據不支持：PSV-20 已接近 fixed d6、20% 是最佳 budget、d6 是 perfect play、或 detector 可外推到其他 domain。
+Development：opening seeds `202608250001–202608250100`，預期 4,620 eligible states。
 
-## Latest Change
+Reserved fresh：`202608250101–202608250150`。
 
-Repository standardization 已開始：新增 `SPEC.md` / `spec/project_spec.json` / `docs/code_registry.md` / standardization audit / Seed Spec regression test / project-spec validator，並開始將 superseded workflows 移出 active GitHub Actions。此批變更尚須最終 CI 與 public Viewer 驗證後才可標記完成。
+Fresh confirmation 硬性 blocked，直到存在 hash-registered `spec/v4_06_frozen_rule.json`、project validator PASS，以及 authoritative validated reserved-seed replay source。Manual checkbox 不再能解除 gate。
 
-## Next
+## Machine-Enforced Gates
 
-先完成並 VERIFY repository standardization 與 public static reading interface。完成後恢復研究主線：
+FORMAL job 內會依序跑 global spec validator、deterministic smoke、V4-06 validator、development source identity verification，再允許 analysis。「檔案存在」不再等於「已驗證」。
 
-`V4-02 — Offline oracle replay / missed-instability analysis`。
+## Formal Evidence Archival
 
-## Blocked
+Actions artifact 只當 transport copy。V4-06 在標記 verified-complete 前，validated formal evidence 必須保存到 `results/v4_06/`，包含 summary、bucket analysis、validation/source manifests、schema/version、source commit 與 SHA-256。
 
-None.
+## Earlier Verified Evidence
 
-## Status Vocabulary
+- V4-01：PSV vs P4 score rate **59.0%**；PSV/P4 nodes **6.40×**；PSV/P6 nodes **13.37%**。
+- V4-02：eligible **2,336**；instability **48.84%**；missed **765**；recall **32.95%**。
+- V4-03：d4 Top-5 missed coverage **83.27%**。
+- V4-04：root learned ranking gate **WEAK**。
+- V4-05：fresh R0 Top-3 **50.73%**；locked R1 Top-3 **49.13%**；gate **WEAK**。
 
-- **未完成**：尚未執行、正在執行或執行失敗。
-- **已修改、未驗證**：程式或設定已改，但未通過 build/test/validator。
-- **已驗證完成**：有實際測試或資料驗證證據。
+## Active Workflow Architecture
 
-Last updated: 2026-08-25
+Exactly five active workflows：CI、seed batch、V4-06 INIT、V4-06 SMOKE、V4-06 FORMAL。Exact set is machine-registered in `spec/project_spec.json` and checked by `tools/validate_project_spec.py`。
+
+## Immediate Next
+
+1. schema-v2 CI + GitHub V4-06 SMOKE PASS。
+2. Run FORMAL development on the complete 4,620-state corpus。
+3. Validate residual + phase-stratified + clustered-bootstrap outputs。
+4. Interpret effect direction, monotonicity, effect size and uncertainty without post-hoc hypothesis changes。
+5. If justified, freeze and hash-register one interpretable rule。
+6. Generate/validate reserved seeds 101–150 source，then fresh confirmation。
+7. Archive validated evidence under `results/v4_06/`。
