@@ -1,6 +1,6 @@
 # Ataxx 專題研究規格
 
-> 全域版本與語義規格請以 [`SPEC.md`](SPEC.md) 為準；本文件只描述研究問題與方法方向。
+> 全域版本與語義規格請以 [`SPEC.md`](SPEC.md) 為準；即時進度以 [`PROJECT_STATUS.md`](PROJECT_STATUS.md) 為準。本文件只描述研究問題與方法方向。
 
 ## 題目
 
@@ -12,29 +12,45 @@
 1. **Search Instability**：不同搜尋深度下，最佳走法與 move ranking 多常改變？
 2. **Volatility Detection**：能否用便宜的盤面或淺層搜尋資訊預測這種改變？
 3. **Position-Level Selective Deepening**：依局面 volatility 分配搜尋深度，能否取得比固定深度更好的 strength/cost tradeoff？
-4. **Branch-Level Selective Deepening**：能否只對高 volatility 的候選分支額外深化？
+4. **Branch-Level / Ataxx-Specific Selective Deepening**：真正的 deeper-search target 若仍位於 shallow candidate pool，能否利用 Ataxx 特有 conversion mechanics 判斷哪些 branch 或 position 值得額外搜尋？
 
 主線：
 
-`Search Instability → Volatility Detection → Position-Level → Branch-Level Selective Deepening`
+`Search Instability → Volatility Detection → Position-Level Selective Deepening → Missed-State Diagnosis → Branch-Level Feasibility → Ataxx-Specific Conversion Mechanics → Conditional Selective Deepening`
+
+## 已建立的研究脈絡
+
+- V3-02 已確認 d4→d6 best-move disagreement 足以形成可研究現象。
+- V3-03 建立 locked volatility detector。
+- V4-01 position-level selective deepening 能改善 fixed d4，但仍遠弱於 fixed d6。
+- V4-02 顯示主要瓶頸是 **false negatives / missed instability**，不是 unnecessary deepening。
+- V4-03 顯示 eventual d6 target 多數仍留在 shallow Top-K candidate pool，candidate generation 並非主要困難。
+- V4-04 root-level learned ranking 與 V4-05 reply-level volatility ranking 均未通過主要 gate（WEAK）。
+- 因此目前 V4-06 不再只是更換 classifier，而是回到 Ataxx 核心規則，測試大量 conversion / counter-conversion / cascade 是否提供額外可解釋訊號。
 
 ## 目前實作方法
 
 - Baseline / reference search：**Fixed-depth Alpha-Beta**。
 - V3/V4 正式研究使用彼此獨立的 d2 / d4 / d6 search calls。
 - `d6` 是較深 reference search，不等於 ground truth 或 perfect play。
-- Volatility 候選訊號包含 best-move disagreement、score swing、淺搜 node growth、感染數、mobility、legal move count、piece difference 等。
-- Oracle analysis：可在正式 outcome 凍結後，離線補算較深搜尋，以估計 missed instability / selective-deepening 上限。
+- V3 detector 使用 frozen shallow/board/search features；其正式適用範圍為 ply 6–30。
+- Oracle replay 在 outcome 凍結後離線補算 d6，用於 missed-instability diagnosis；oracle 資訊不得洩漏進 online gating feature。
+- V4-06 primary conversion features 固定計算在 `original_d4_move`，d6-derived values只能當 retrospective outcome。
+- V4-06 同時檢查 all-eligible 與 detector-negative residual cohort，並對 early/mid/late phase 分層。
+- V4-06 primary uncertainty 使用 opening-seed clustered bootstrap；細節以 `spec/v4_06_conversion_analysis.json` 為準。
 
-**Iterative Deepening 尚未作為目前 V3/V4 的正式 baseline 實作或使用。**若未來加入，必須另做 implementation / verification / protocol version，不能把它描述成已完成方法。
+**Iterative Deepening 尚未作為目前 V3/V4 的正式 baseline 實作或使用。**若未來加入，必須另做 implementation / verification / protocol version。
 
-比較不同方法時，應同時報告 **nodes** 與 **wall-clock**。Nodes 為較不受硬體影響的主要計算成本 proxy；wall-clock 用於實際執行效率參考。
+比較方法時同時報告 **nodes** 與 **wall-clock**；nodes 是主要計算成本 proxy，wall-clock 用於實際執行效率參考。
 
 ## 評估
 
 - Best-move agreement with deeper reference
 - Move instability / score swing
 - Volatility detector discrimination / calibration
+- Missed-instability recall / false-negative structure
+- Conversion-risk / cascade effect size and uncertainty
+- Detector-negative residual discrimination
 - Paired color-swapped game score rate
 - Nodes searched
 - Time per move / game
@@ -43,20 +59,23 @@
 
 ## 範圍
 
-主實驗使用標準 `7×7`、無障礙 Ataxx，V3 detector 的正式適用範圍為 ply 6–30。
+主實驗使用標準 `7×7`、無障礙 Ataxx，避免 board size / topology 成為主要混淆變因。
 
 現有 `N×N` 引擎與 Procedural Level Generator 保留作延伸，可研究棋盤尺寸、障礙與 topology 對 volatility 的影響。Othello 可作跨遊戲驗證，但不是目前主線。
 
 ## 研究進程
 
-1. 核心引擎與測試
-2. Fixed-depth Alpha-Beta
-3. Position sampling + search logging + deeper reference
-4. Search Instability 統計
-5. Volatility Detector
-6. Position-Level Selective Deepening
-7. Offline missed-instability / oracle diagnosis
-8. Branch-Level Selective Deepening
-9. 固定／可比較計算成本的完整 strength-cost 分析
+1. 核心引擎與測試 ✅
+2. Fixed-depth Alpha-Beta ✅
+3. Position sampling + search logging + deeper reference ✅
+4. Search Instability measurement ✅
+5. Volatility Detector ✅
+6. Position-Level Selective Deepening ✅
+7. Missed-State / oracle diagnosis ✅
+8. Branch candidate feasibility ✅
+9. Generic root/reply discrimination — completed, result WEAK
+10. **Ataxx-specific conversion mechanism analysis — current V4-06**
+11. Conversion-aware selective deepening — conditional on V4-06 evidence
+12. 固定／可比較計算成本的完整 strength-cost analysis
 
-CNN/GNN、PLR、GA 與大型強化學習目前不列入主線。
+CNN/GNN、PLR、GA、大型強化學習、任意大棋盤泛化目前不列入主線。
