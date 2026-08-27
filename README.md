@@ -2,11 +2,14 @@
 
 Public Pages：<https://jjeremytang.github.io/ataxx-varbench-viewer/>
 
+**Project Tree：<https://jjeremytang.github.io/ataxx-varbench-viewer/project-tree.html>**
+
 本 repository 是 **read-only presentation layer**，不是正式研究引擎。正式 C++ simulation、frozen protocol、model/artifact SHA 與 raw formal results 保存在 private `ataxx-varbench` repository。
 
 ## Pages structure
 
 - `index.html` — 研究入口／正式結果摘要／文件與核心程式導覽。
+- `project-tree.html` — 專題研究樹狀圖，展示 Search Instability → Volatility Detection → Selective Deepening → Ataxx-specific mechanism analysis 的研究脈絡與目前進度。
 - `reader.html` — 將 private repo 的指定 Markdown snapshot 轉成友善 HTML article。
 - `code.html` — 核心 C++ source snapshot 靜態閱讀器，含行號與來源 commit。
 - `viewer.html` — 已發布 Seed / game replay viewer。
