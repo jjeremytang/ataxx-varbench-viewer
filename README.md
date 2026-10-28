@@ -6,6 +6,8 @@ Public Pages：<https://jjeremytang.github.io/ataxx-varbench-viewer/>
 
 本 repository 是 **read-only presentation layer**，不是正式研究引擎。正式 C++ simulation、frozen protocol、model/artifact SHA 與 raw formal results 保存在 private `ataxx-varbench` repository。
 
+**專案字典（私人）：[開啟字典](glossary.html)**。需使用建立網站的 ChatGPT 帳號登入。公開 Viewer 僅提供入口，不保存字典內容。
+
 ## Pages structure
 
 - `index.html` — 研究入口／正式結果摘要／文件與核心程式導覽。
@@ -71,3 +73,4 @@ node tests/site.test.js
 ```
 
 只有 Seed Spec regression 與所有 catalog/local navigation 檔案都存在時才部署。
+

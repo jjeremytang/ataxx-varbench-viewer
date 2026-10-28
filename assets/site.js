@@ -165,6 +165,7 @@ const SITE = (() => {
     const links = [
       ['home', 'index.html', '研究入口'],
       ['results', 'results.html', '實驗結果'],
+      ['glossary', 'glossary.html', '專案字典'],
       ['docs', 'reader.html?id=spec', '研究文件'],
       ['code', 'code.html?id=ataxx-cpp', '程式碼'],
       ['viewer', 'viewer.html', '對局檢視器'],
@@ -257,3 +258,4 @@ const SITE = (() => {
 
   return {initHome, initResults, initReader, initCode, safeInit};
 })();
+

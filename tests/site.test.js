@@ -73,3 +73,13 @@ assert.ok(readme.includes('Current: Seed Spec v3'));
 assert.ok(readme.includes('read-only presentation layer'));
 
 console.log(`Static site validation PASS: Traditional Chinese UI, ${catalog.items.length} catalog items from ${catalog.private_source_commit}`);
+
+
+const glossary = read('glossary.html');
+assert.ok(index.includes('glossary.html'));
+assert.ok(siteJs.includes('glossary.html'));
+assert.ok(viewer.includes('glossary.html'));
+assert.ok(glossary.includes('https://ataxx-project-dictionary.littleduck0416.chatgpt.site'));
+assert.ok(glossary.includes('ChatGPT 帳號登入'));
+assert.ok(glossary.includes('http-equiv="refresh"'));
+console.log('Private dictionary navigation PASS');
